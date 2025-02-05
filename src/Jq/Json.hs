@@ -1,20 +1,21 @@
 module Jq.Json where
 
 data JSON =
-    JNull
+     JNull
 
 instance Show JSON where
-  show (JNull) = "null"
+  show JNull   = "null"
+  show _       = undefined
 
 instance Eq JSON where
   JNull == JNull = True
   _ == _ = undefined
 
 -- Smart constructors
--- These are included for test purposes and
--- aren't meant to correspond one to one with actual constructors you add to JSON datatype
--- For the tests to succeed fill them in with functions that return correct JSON values
--- Don't change the names or signatures, only the definitions
+-- These are included for test purposes and aren't meant to correspond one to one
+-- with the actual constructors of the JSON datatype.
+-- For the "weekly" tests to succeed fill them in so that they return
+-- correct JSON values. Don't change the names or the signatures.
 
 jsonNullSC :: JSON
 jsonNullSC = JNull

@@ -12,7 +12,7 @@ If you're on Windows, [here's](https://gitlab.ewi.tudelft.nl/cse3100/jq-clone/-/
 
 
 While the best way to follow this part of the intro is with a shell open, we also put the data on jqplay.org for you to play with.
-It's not quite as fast as your local installation, but works in your favourite browser: [jqplay snippet](https://jqplay.org/s/B3BM9c_xIv0).
+It's not quite as fast as your local installation, but works in your favourite browser: [jqplay snippet](https://play.jqlang.org/s/B3BM9c_xIv0).
 </details>
 
 NASA provides a database of meteorites, as JSON object, so let's download it:
@@ -110,7 +110,7 @@ We can use `.field` syntax to access object fields, `.[n]` to access array eleme
 ```
 
 `jq` also includes a lot of other features, like comparisons `==`,`!=` and filters `select`.
-You can check the [documentation](https://jqlang.github.io/jq/manual/) and the [tutorial](https://jqlang.github.io/jq/tutorial/11198540).
+You can check the [documentation](https://jqlang.github.io/jq/manual/) and the [tutorial](https://jqlang.org/tutorial/).
 
 So, given a list of meteorites with all coordinates, we can list all the meteorites that fell in the Netherlands.
 Of course, checking precise bounds is going to be hard, so let's just do a bounding box from [humdata.org](https://data.humdata.org/dataset/bounding-boxes-for-countries/resource/aec5d77d-095a-4d42-8a13-5193ec18a6a9):  
@@ -145,4 +145,4 @@ And there it is, if we double-check on [https://www.lpi.usra.edu/meteor/metbull.
 If you want to play with `jq` a bit more, here's a couple of things to try:
 
 * Find a bounding box for the EU and run the same check with new boundaries.
-* [https://gist.github.com/graydon/11198540](https://gist.github.com/graydon/11198540) provides bounding boxes in JSON format, write a jq filter that extracts bounding box for the Netherlands.
+* [gist.github.com/graydon/11198540](https://gist.github.com/graydon/11198540) provides bounding boxes in JSON format, write a jq filter that extracts bounding box for the Netherlands.

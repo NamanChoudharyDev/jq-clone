@@ -2,7 +2,7 @@
 
 # Implementing `jq` in Haskell
 
-`jq` ([https://jqlang.github.io/jq/](https://jqlang.github.io/jq/)) is a JSON processor.
+`jq` ([jqlang.org](https://jqlang.org/)) is a JSON processor.
 It's built in the spirit of Unix: doing one thing, but doing it well.
 Think of `awk`, `sed` or `grep`, but for JSON.
 And we're going to build its clone in Haskell!
@@ -19,7 +19,7 @@ However, you are allowed to discuss the assignment with other students and ask g
 See [www.tudelft.nl/en/student/legal-position/fraud-plagiarism/](https://www.tudelft.nl/en/student/legal-position/fraud-plagiarism/) for the general TU Delft policy regarding fraud.
 
 It is expected that completing the project will take you approximately 30-40 hours.
-When you have finished the project, you should hand in your final solution via Weblab before **Friday, 19th of April, 23:59**.
+When you have finished the project, you should hand in your final solution via Weblab before **23:59 on April 18th, 2025**.
 Detailed instructions for submitting your solution will appear on Weblab.
 
 ## Introducing `jq`
@@ -30,9 +30,9 @@ First let's see what `jq` is all about.
 You will find it in the [`JQ-CASE-STUDY.md`](./JQ-CASE-STUDY.md)
 
 ### Documentation and more
-There's a [tutorial](https://jqlang.github.io/jq/tutorial/), which introduces some of the basic features of the tool.
-Then there's official [documentation](https://jqlang.github.io/jq/manual/).
-And finally, you can play with `jq` in your browser on [jqplay.org](https://jqplay.org/).
+There's a [tutorial](https://jqlang.org/tutorial/), which introduces some of the basic features of the tool.
+Then there's official [documentation](https://jqlang.org/manual/).
+And finally, you can play with `jq` in your browser on [play.jqlang.org](https://play.jqlang.org/).
 
 > **NOTE** : for some inputs that contain escaped characters,
 `jq` and `jqplay` can give different results, this has to do with escaping backslashes in terminal or powershell.
@@ -58,10 +58,10 @@ The template code you are given already contains the functionality to parse `nul
 
 - `JSON.hs` contains a datatype `JSON` to represent JSON data. It only has a single constructor `JNull`, so you will need to extend it with additional constructors to represent all kinds of `JSON` data. You're also required to implement by hand `Show` and `Eq` type-class isntances for this datatype.
 - `Filters.hs` contains a datatype `Filter` to represent `jq` filters. It has a single constructor for identity filter, so you will need to extend it too.
-- `Compiler.hs` contains the function `compile` that transforms a `Filter` into a function of type `JSON -> Either String [JSON]`, that can be executed on `JSON` values to produce either an error `String` or a list of results. It is currently only implemented for the `Identity` filter, so you will need to add cases for the other filters. Once you learn about monads you see that `compile` function fits the use-case of `Reader` monad. While we can't check the style-code of every submission, we highly encourage you to (re)write your `compile` function with `Reader`. The final signature would be then `Reader JSON (Either String [JSON])`
-- `CParser.hs` and `JParser.hs` contain functions `parseFilter` and  `parseJSON` for parsing filters and `JSON` data, respectively. They both make use of the monadic parsing library from Chapter 13 of *Programming in Haskell (second edition)* by Graham Hutton. The code from this chapter can be found in the file `Parsing/Parsing.hs`. The functionality of `CParser.hs` and `JParser.hs` is re-exported by the module `Parser.hs`.
-- Finally, `Main.hs` contains the `main` function that collects the inputs, compiles the filter and runs it. You do not need to edit it yourself.
-- `Parsing` contains parsing library by Graham Hutton.
+- `Compiler.hs` contains the function `compile` that transforms a `Filter` into a function of type `JSON -> Either String [JSON]`. When you apply it to a `JSON` value, it'll produce either an error of type `String` or a list of results. Currently `compile` is implemented only for the `Identity` filter, so you will need to add cases for the other filters. Once you learn about monads, you will see that `compile` fits well with the `Reader` monad. While we can't check the style-code of every submission, we highly encourage you to (re)write your `compile` function with `Reader` - its type signature then becomes `Reader JSON (Either String [JSON])`.
+- `CParser.hs` and `JParser.hs` contain functions `parseFilter` and  `parseJSON` for parsing filters and `JSON` data, respectively. Both are re-exported by the module `Parser.hs` and make use of a monadic parsing library (`Parsing/Parsing.hs`).
+- Finally, `Main.hs` contains the `main` function that collects the inputs, compiles the filter and runs it. You do not need to edit it.
+- As mentioned above, `Parsing/Parsing.hs` contains a parsing library from Chapter 13 of *Programming in Haskell (second edition)* by Graham Hutton.
 
 The `test` directory contains some (extensible) tests for you to run. More information in the "Testing" section below.
 
@@ -81,27 +81,28 @@ online is not allowed.
 
 This section describes the minimum functionality we expect your implementation to satisfy.
 
-*Grading*. In this section you can earn a maximum of 75 points, which constitutes 75% of your final grade for the project. "0 points" means that the feature is already implemented in the template. You don't *have* to do tasks above in any particular order, but we feel like this order corresponds to escalating difficulty in implementation.
+*Grading*. In this section you can earn a maximum of 65 points, which constitutes 65% of your final grade for the project. You don't *have* to do tasks above in any particular order, but we feel like this order corresponds to escalating difficulty in implementation.
+"0 points" means that the feature is already implemented in the template or we will release a solution to it.
 
 1. (0 points) Read JSON input from STDIN and filters as the first argument.  
   `echo '{"this" : "that"}' | jq '.'`
-2. (15 points) Parse and pretty-print valid JSONs.  
+2. (5 points) Parse and pretty-print valid JSONs.  
    This means, that your implementation should be able to handle  
    1. (0 points)`null`
-   2. (3 points) Numbers (floating-point `1.0` and E-notation included `1.0E+20`)
-   3. (3 points) Strings (with support for escape characters `"Hello, \"world\"!"` and unicode characters)
-   4. (1 point) Booleans
-   5. (4 points) Arrays
-   6. (4 points) JSON Objects
+   2. (0 points) Numbers (floating-point `1.0` and E-notation included `1.0E+20`)
+   3. (0 points) Strings (with support for escape characters `"Hello, \"world\"!"` and unicode characters)
+   4. (1 point)  Booleans
+   5. (2 points) Arrays
+   6. (2 points) JSON Objects
 
    > *Hint*: Add constructors to the `JSON` type in `src/Jq/Json.hs` and define a parser for each constructor in `src/Jq/JParser.hs`  
 
    Please also note that since for grading purposes we will be test your program as whole, we have to rely heavily on the correctness of implementation for pretty-printing and parsing. So while this subtask might seem relatively easy, a big part of your grade depends on it transitively.
 
-3. (45 points total) Implement all [basic filters](https://jqlang.github.io/jq/manual/#basic-filters).
+3. (45 points total) Implement all [basic filters](https://jqlang.org/manual/#basic-filters).
    In particular:
    1. (0 points) Identity filter `.`, which returns an object given to it.
-   2. (2 point) Parenthesis '()', used for grouping operations.
+   2. (2 point)  Parenthesis '()', used for grouping operations.
    3. (5 points) Object indexing, both identifier `.field_name` and generic `.["field_name"]`.  
       If the field doesn't exist, running the filter should return `null`.
       In this case "generic" means for all field names, as opposed to "identifier-like".
@@ -126,7 +127,7 @@ This section describes the minimum functionality we expect your implementation t
    `echo 'null' | jq '{"this" : [42]}'` (this produces `{"this": [42]})`).  
    For this task you're asked to implement only the "simple" ones: numbers, booleans, strings, arrays without iteration (`[1,2,.field]`, not `[.[]]`), objects.
 
-5. (5 points) [Recursive descent operator](https://jqlang.github.io/jq/manual/#recursive-descent) `..` iterates over all sub-values of the current value, including itself.  
+5. (5 points) [Recursive descent operator](https://jqlang.org/manual/#recursive-descent) `..` iterates over all sub-values of the current value, including itself.  
   For example, `echo [{"a" : 1}] | jq '..'` results in
 
   ```json
@@ -151,20 +152,20 @@ section require the basic functionality from the previous section to be already
 implemented, so it does not make sense to start on these advanced features
 before you are confident in your implementation of the basic part.
 
-* (7 points) Generic indexing with filters.  
+* (5 points) Generic indexing with filters.  
   A more general counterpart for object and array indexing, allowing arbitrary filters and iterators in the brackets.  
   For example: `echo '{"this" : ["that"], "that" : 1}' | jq '.[.this[]]'`, which returns `1`.  
   To keep this assignment independent from one with comparison operators below, you are asked to implement indexing with arbitrary filters, which output either numbers/iterators or strings.  
   Mind that this task also includes slices, generated with filters, e.g. `echo '[1, 2, 3, 4]' | jq '.[.[0]:.[3]]'`.  
   In order for this subtask to count your implementation should handle all JSON values, have all basic filters, and all basic constructors.
 
-* (10 points) More complex value constructors  
+* (7 points) More complex value constructors  
   This is complementary to the subtask with basic value constructors -- implement the constructors for arrays e.g. `[.items[].name]`, objects (`{user}`, `{(.[]) : null}`).  
   Be warned that this part is harder than it seems and some features interact in a non-obvious way, and not every aspect of behaviour is described precisely in the documentation.  
   In case of doubt, you can experiment with the reference implementation and follow what it does.
   In order for this subtask to count your implementation should handle all JSON values, have all basic filters, and all object constructors.
 
-* (10 points) [Conditionals and comparisons](https://jqlang.github.io/jq/manual/#conditionals-and-comparisons):
+* (10 points) [Conditionals and comparisons](https://jqlang.org/manual/#conditionals-and-comparisons):
   * "Equal" and "not equal" operators `==`, `!=`, which take two JSON values and output a Boolean.
   * If-then-else expression `if A then B else C end`.
   * Comparison operators for numbers `<`, `<=`, `>`, `>=`
@@ -172,20 +173,23 @@ before you are confident in your implementation of the basic part.
 
    In order for this subtask to count your implementation should handle all JSON values and have all basic filters.
 
-* (10 points) Arithmetic expressions: `+,-,*,/`, described [here](https://jqlang.github.io/jq/manual/#builtin-operators-and-functions).  
+* (10 points) Arithmetic expressions: `+,-,*,/`, described [here](https://jqlang.org/manual/#builtin-operators-and-functions).  
   Mind that these operations operate not only on numbers, but also on other JSON values such as arrays, strings, and objects.  
   In order for this subtask to count your implementation should handle all JSON values, have all basic filters, and simple object constructors.
 
-* (10 points) [Try-catch expressions](https://jqlang.github.io/jq/manual/#try-catch) `try op1 catch expr` which tries to execute `op1` and if exception appears, returns `expr`.  
+* (10 points) [Try-catch expressions](https://jqlang.org/manual/#try-catch) `try op1 catch expr` which tries to execute `op1` and if exception appears, returns `expr`.  
   In order for this subtask to count your implementation should handle all JSON values and have all basic filters.
 
-* (12 points) [Syntactic variables](https://jqlang.github.io/jq/manual/#variable-symbolic-binding-operator) `expr as $id | op`, which allow you to bind the value expr to identifier `id` before passing it further to `op`.  
+* (20 points) [Variables](https://jqlang.org/manual/#variable-symbolic-binding-operator) `expr as $id | op`, which allow you to bind the value expr to identifier `id` before passing it further to `op`.  
+  * (10 points) Binding names. In this subtask you only have to implement basic variable binding, `expr as $id`.  
+    In order for this subtask to count your implementation should handle all JSON values and have all basic filters.
+  * (10 points) Pattern-matching binding. In the manual this is referred to as "destructing". This requires you to bind multiple variables within the same patter. For example `expr as {username: $name, posts : [$fpost, $spost]} | op`, which will destruct object geneerated by expression and make variables `name`, `fpost`, and `spost` available in `op`.  
+    In order for this subtask to count, you should have regular name-binding from the previous subtask and simple value constructors implemented.
+
+* (15 points) [Reduction operator](https://jqlang.org/manual/#reduce) `reduce`, which corresponds to a fold over results returned by the previous operation.  
   In order for this subtask to count your implementation should handle all JSON values and have all basic filters.
 
-* (15 points) [Reduction operator](https://jqlang.github.io/jq/manual/#reduce) `reduce`, which corresponds to a fold over results returned by the previous operation.  
-  In order for this subtask to count your implementation should handle all JSON values and have all basic filters.
-
-* (15 points) [Functions](https://jqlang.github.io/jq/manual/#defining-functions), which allows you to define syntactical functions in jq filters.  
+* (15 points) [Functions](https://jqlang.org/manual/#defining-functions), which allows you to define syntactical functions in jq filters.  
   In order for this subtask to count your implementation should handle all JSON values, have all basic filters, and simple object constructors.
 
 ## Approaching the project
@@ -206,19 +210,19 @@ While you're not required to submit your project earlier and can still do everyt
 To help you approach the task gradually we chose the following stages to provide feedback on:  
 * Week **3**. Define JSON and its typeclass instances for Eq, Show.
 * Week **4**. Define some filters, start compiling programs.
-* Define parsers after the lecture on monadic parsing. Also start implementing the rest of the base project features.
+* Week **5**. Define parsers after the lecture on monadic parsing. Also start implementing the rest of the base project features.
 * Week **6** and onwards. Implement features from the advanced project.
 
 ### Suggested implementation order
 
 If you are unsure where to start or feeling a bit lost, you can approach the project in the following manner:
 
-1. Define a datatype for `JSON` and type class instances on week 3.
+1. Define a datatype for `JSON` and type class instances on week 3. We will release solutions to parts of this subtask that aren't graded in week 4.
 2. Define a datatype for `Filters` in week 4. You can start small and implement only identity and field indexing initially. Write respective `compile` clauses.
 3. Implement pipe and comma operators.
 4. Implement arrays and array operations.
-5. Write a parser for numbers and strings.  
-   Maybe skip floating point and escape characters for now -- you can always add them later.
+5. Write a parser for primitive values: booleans, numbers, strings.  
+   Once again, we will release solutions to parts of this subtask that aren't graded in week 5.
 6. Extend the parsing to handle objects (see the [JSON parsing diagrams](https://www.json.org/json-en.html)).
 7. Write a parser for filters.
    At this point you should have a program that can be ran from the command-line, yay!
@@ -228,7 +232,7 @@ If you are unsure where to start or feeling a bit lost, you can approach the pro
 
 #### Developing a project without parser
 
-You probably noticed that if you follow the suggested implementation order you won't be able to test all the features you're working on from the shell until you have implemented parsers.
+You probably noticed that if you follow the suggested implementation order you won't be able to test all the features you're working on from the shell until you have implemented the parsers.
 Our suggestion is to rely on GHCi and QuickCheck instead.
 * For QuickCheck introduction you can consult lecture slides, the [blog post](https://jesper.cx/posts/quickcheck-intro.html) and included tests for week 3 and 4.
 * For GHCi documentation you can consult the [official manual](https://downloads.haskell.org/ghc/latest/docs/html/users_guide/ghci.html) or Chapter 2 (First steps) for Graham Hutton's book.

@@ -59,12 +59,10 @@ testsAndComments :: Parser [JTestInstance]
 testsAndComments =
   fmap (map fromJust . filter isJust) . many $  (fmap (const Nothing) comment)
                                             <|> (fmap Just test)
-
 testfile :: Parser JTest
 testfile = do
   ts <- testsAndComments
   return $ JTestGroup "Input-output tests" (map JTestOne ts)
-
 
 toparse :: IO String
 toparse = do
@@ -95,7 +93,6 @@ getProgram Nothing filter i = do
   where
     someh :: SomeException -> IO (Either String String)
     someh _ = return $ Left "caught some exception"
-
 getProgram (Just s) filter i = do
   let sc = setStdin (byteStringInput (fromString i))
          $ setStdout byteStringOutput
@@ -136,7 +133,7 @@ createTest p (JTestGroup name gt) =
 
 main :: IO ()
 main = do
-  -- to test the testsuite
+  -- to test the testsuite itself
   -- let program = getProgram (Just "jq --sort-keys -M")
   -- to test the submission
   let program = getProgram Nothing

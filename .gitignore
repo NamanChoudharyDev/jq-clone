@@ -1,6 +1,71 @@
+# Created by https://www.toptal.com/developers/gitignore/api/haskell,emacs,vim,direnv,tags
+# Edit at https://www.toptal.com/developers/gitignore?templates=haskell,emacs,vim,direnv,tags
 
-# Created by https://www.toptal.com/developers/gitignore/api/tags,emacs,haskell
-# Edit at https://www.toptal.com/developers/gitignore?templates=tags,emacs,haskell
+### Haskell ###
+dist
+dist-*
+cabal-dev
+*.o
+*.hi
+*.hie
+*.chi
+*.chs.h
+*.dyn_o
+*.dyn_hi
+.hpc
+.hsenv
+.cabal-sandbox/
+cabal.sandbox.config
+*.prof
+*.aux
+*.hp
+*.eventlog
+.stack-work/
+cabal.project.local
+cabal.project.local~
+.HTF/
+.ghc.environment.*
+
+### direnv ###
+.direnv
+.envrc
+
+### Tags ###
+# Ignore tags created by etags, ctags, gtags (GNU global) and cscope
+TAGS
+.TAGS
+!TAGS/
+tags
+.tags
+!tags/
+gtags.files
+GTAGS
+GRTAGS
+GPATH
+GSYMS
+cscope.files
+cscope.out
+cscope.in.out
+cscope.po.out
+
+### Vim ###
+# Swap
+[._]*.s[a-v][a-z]
+!*.svg  # comment out if you don't need vector files
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+# Auto-generated tag files
+# Persistent undo
+[._]*.un~
 
 ### Emacs ###
 # -*- mode: gitignore; -*-
@@ -52,49 +117,7 @@ flycheck_*.el
 # network security
 /network-security.data
 
+# End of https://www.toptal.com/developers/gitignore/api/haskell,emacs,vim,direnv,tags
 
-### Haskell ###
-dist
-dist-*
-cabal-dev
-*.o
-*.hi
-*.hie
-*.chi
-*.chs.h
-*.dyn_o
-*.dyn_hi
-.hpc
-.hsenv
-.cabal-sandbox/
-cabal.sandbox.config
-*.prof
-*.aux
-*.hp
-*.eventlog
-.stack-work/
-cabal.project.local
-cabal.project.local~
-.HTF/
-.ghc.environment.*
-
-### Tags ###
-# Ignore tags created by etags, ctags, gtags (GNU global) and cscope
-TAGS
-.TAGS
-!TAGS/
-tags
-.tags
-!tags/
-gtags.files
-GTAGS
-GRTAGS
-GPATH
-GSYMS
-cscope.files
-cscope.out
-cscope.in.out
-cscope.po.out
-
-
-# End of https://www.toptal.com/developers/gitignore/api/tags,emacs,haskell
+## Nix stuff
+result

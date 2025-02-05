@@ -1,46 +1,31 @@
 # Project for FP course at TU Delft
 
-A clone of `jq` in Haskell.
-
-You will find the description of the task on Brightspace.
+A clone of `jq` in Haskell. You will find week-by-week description of the task on Brightspace. Full description is ASSIGNMENT.md.
 
 ## Build
-```
-> stack build
-```
 
-## Install
-
+```bash
+cabal build
 ```
-> stack install
-```
-
-this installs your executable to `~/.local/bin` by default (on *nix), make sure it's in $PATH
 
 ## Test
 
-```
-stack test
+```bash
+cabal test
 ```
 
 You will need `jq` installed and available on `$PATH` to run `from-upstream` test suite.
 
 ## Use
 
-```
-> echo '{"this" : "that"}' | jq-clone '.this'
-```
-
-or
-
-```
-> echo '{"this" : "that"}' | stack run -- '.this'
+```bash
+echo '{"this" : "that"}' | cabal run -- '.this'
 ```
 
-## Test `jq` online
+## Try `jq` online
 
-[jqplay.org](https://jqplay.org/)
+[play.jqlang.org](https://play.jqlang.org/)
 
 ## Docs
 
-[jqlang.github.io/jq/manual](https://jqlang.github.io/jq/manual/)
+[jqlang.org/manual](https://jqlang.org/manual/)
