@@ -9,17 +9,22 @@ And we're going to build its clone in Haskell!
 
 In this text, we provide you with a description of what we expect you to implement.
 **Please read it fully and carefully.**
-The assignment is divided into two parts: a basic part and an advanced part. To get a passing grade for the project, you only have to implement the basic part.
-Implementing the advanced part correctly will lead to a higher grade.
-However, you will only score points for the advanced part if your basic part is of acceptable quality, more details on that below.
+The assignment is divided into three types of tasks: basic, advanced, and challenge.
+
+* By implementing the basic tasks you can earn a grade of up to 6.5.
+* If you implement at least one advanced task, you can earn a grade of up to 8.5.
+* If you also implement at least one challenge task, you can earn a grade of up to 10.
+
+Note that advanced and challenge tasks require certain parts of the basic project to be implemented correctly.
 
 This is an *individual project*, which means you should not collaborate directly with other students.
 However, you are allowed to discuss the assignment with other students and ask general questions on TU Delft Answers.
 **Under no circumstances should you ever look at complete or partial solutions by another student, or show (part of) your code to another student.**
 See [www.tudelft.nl/en/student/legal-position/fraud-plagiarism/](https://www.tudelft.nl/en/student/legal-position/fraud-plagiarism/) for the general TU Delft policy regarding fraud.
 
-It is expected that completing the project will take you approximately 30-40 hours.
-When you have finished the project, you should hand in your final solution via Weblab before **23:59 on April 18th, 2025**.
+It is expected that completing the project will take you approximately 20-30 hours.
+However, completing all tasks will likely take significantly longer, so choose carefully which tasks you work on.
+When you have finished the project, you should hand in your final solution via Weblab before **23:59 on April 11th, 2026**.
 Detailed instructions for submitting your solution will appear on Weblab.
 
 ## Introducing `jq`
@@ -77,11 +82,12 @@ If you want to use these packages, you should uncomment the corresponding
 line(s) in `JqClone.cabal`. Using other packages or copy-pasting code you found
 online is not allowed.
 
-### Base project
+### Basic tasks
 
-This section describes the minimum functionality we expect your implementation to satisfy.
-
-*Grading*. In this section you can earn a maximum of 65 points, which constitutes 65% of your final grade for the project. You don't *have* to do tasks above in any particular order, but we feel like this order corresponds to escalating difficulty in implementation.
+This section describes the basic tasks that we expect you to implement for the project.
+You don't *have* to implement all the tasks here, nor do you have to do them in any particular order, but we feel like this order corresponds to escalating difficulty in implementation.
+Each point is worth 0.1 of your final grade for the project, but your total grade is capped at 6.5 unless you also implement an advanced task.
+We recommend you complete at least 65 points of the basic tasks before moving on to the advanced tasks.
 "0 points" means that the feature is already implemented in the template or we will release a solution to it.
 
 1. (0 points) Read JSON input from STDIN and filters as the first argument.  
@@ -108,10 +114,10 @@ This section describes the minimum functionality we expect your implementation t
       In this case "generic" means for all field names, as opposed to "identifier-like".
       For fully generic field access look at the first one of the advanced tasks.
    4. (5 points) Optional object indexing `.field?` (and `.["field"]?`), which doesn't rise an exception if the value indexed into isn't an object.
-   5. (5 points) Array index and slice `.[0]`, `.[0:10]`.  
+   5. (6 points) Array index and slice `.[0]`, `.[0:10]`.
      Slices behave very similarly to Python or Go. Start index (`0` here) is inclusive, while end index (`10`) is not.
-   6. (6 points) Array/Object Value Iterator `.[]`, `.[1,2,3]`.  
-     When applied to an array, the `.[]` filter iterates over its elements, and when applied on an object it iterates over its values (*not* over the keys).  
+   6. (8 points) Array/Object Value Iterator `.[]`, `.[1,2,3]`.
+     When applied to an array, the `.[]` filter iterates over its elements, and when applied on an object it iterates over its values (*not* over the keys).
      `.[0,1,2]` returns an iterator which goes over the first, second and third elements.
    7. (6 points) Optional counterparts for indexing, slicing and iterators.
    8. (8 points) Comma operator `op1 , op2`.  
@@ -127,7 +133,7 @@ This section describes the minimum functionality we expect your implementation t
    `echo 'null' | jq '{"this" : [42]}'` (this produces `{"this": [42]})`).  
    For this task you're asked to implement only the "simple" ones: numbers, booleans, strings, arrays without iteration (`[1,2,.field]`, not `[.[]]`), objects.
 
-5. (5 points) [Recursive descent operator](https://jqlang.org/manual/#recursive-descent) `..` iterates over all sub-values of the current value, including itself.  
+5. (8 points) [Recursive descent operator](https://jqlang.org/manual/#recursive-descent) `..` iterates over all sub-values of the current value, including itself.
   For example, `echo [{"a" : 1}] | jq '..'` results in
 
   ```json
@@ -142,48 +148,50 @@ This section describes the minimum functionality we expect your implementation t
   1
   ```
 
-### Advanced tasks
-
-To get your grade to 100%, your implementation should also include some of the following
-features. The order and the number of points corresponds to the expected
-difficulty in implementation. Each point is worth 1 percent of the final grade,
-but the total grade is capped at 100%. Please note that the tasks in this
-section require the basic functionality from the previous section to be already
-implemented, so it does not make sense to start on these advanced features
-before you are confident in your implementation of the basic part.
-
-* (5 points) Generic indexing with filters.  
-  A more general counterpart for object and array indexing, allowing arbitrary filters and iterators in the brackets.  
-  For example: `echo '{"this" : ["that"], "that" : 1}' | jq '.[.this[]]'`, which returns `1`.  
-  To keep this assignment independent from one with comparison operators below, you are asked to implement indexing with arbitrary filters, which output either numbers/iterators or strings.  
-  Mind that this task also includes slices, generated with filters, e.g. `echo '[1, 2, 3, 4]' | jq '.[.[0]:.[3]]'`.  
-  In order for this subtask to count your implementation should handle all JSON values, have all basic filters, and all basic constructors.
-
-* (7 points) More complex value constructors  
-  This is complementary to the subtask with basic value constructors -- implement the constructors for arrays e.g. `[.items[].name]`, objects (`{user}`, `{(.[]) : null}`).  
-  Be warned that this part is harder than it seems and some features interact in a non-obvious way, and not every aspect of behaviour is described precisely in the documentation.  
-  In case of doubt, you can experiment with the reference implementation and follow what it does.
-  In order for this subtask to count your implementation should handle all JSON values, have all basic filters, and all object constructors.
-
-* (10 points) [Conditionals and comparisons](https://jqlang.org/manual/#conditionals-and-comparisons):
+6. (11 points) [Conditionals and comparisons](https://jqlang.org/manual/#conditionals-and-comparisons):
   * "Equal" and "not equal" operators `==`, `!=`, which take two JSON values and output a Boolean.
+    These operators should work for all basic types, arrays, and objects.
   * If-then-else expression `if A then B else C end`.
   * Comparison operators for numbers `<`, `<=`, `>`, `>=`
   * Logic connectives: `and`, `or`, `not`.
 
-   In order for this subtask to count your implementation should handle all JSON values and have all basic filters.
+7. (16 points) Arithmetic expressions: `+,-,*,/`, described [here](https://jqlang.org/manual/#builtin-operators-and-functions).
+  Mind that these operations operate not only on numbers, but also on other JSON values such as arrays, strings, and objects.
+  * For arrays, `+` is used for concatenation and `-` for deletion.
+  * For strings, `+` is used for concatenation, `*` for repetition, and `/` for splitting.
+  * For objects, `+` is used for merging two objects and `*` for recursively merging two objects (see documentation for details).
 
-* (10 points) Arithmetic expressions: `+,-,*,/`, described [here](https://jqlang.org/manual/#builtin-operators-and-functions).  
-  Mind that these operations operate not only on numbers, but also on other JSON values such as arrays, strings, and objects.  
-  In order for this subtask to count your implementation should handle all JSON values, have all basic filters, and simple object constructors.
 
-* (10 points) [Try-catch expressions](https://jqlang.org/manual/#try-catch) `try op1 catch expr` which tries to execute `op1` and if exception appears, returns `expr`.  
+### Advanced tasks
+
+To get a grade above 6.5 (up to 8.5), your implementation should include at least one of the following tasks.
+Please note that the tasks in this section require the basic functionality from the previous section to be already implemented,
+so it does not make sense to start on these advanced features before you are confident in your implementation of the basic part.
+
+* (10 points) Generic indexing with filters.
+  A more general counterpart for object and array indexing, allowing arbitrary filters and iterators in the brackets.
+  For example: `echo '{"this" : ["that"], "that" : 1}' | jq '.[.this[]]'`, which returns `1`.
+  To keep this assignment independent from one with comparison operators below, you are asked to implement indexing with arbitrary filters, which output either numbers/iterators or strings.
+  Mind that this task also includes slices where the bounds are generated with filters, e.g. `echo '[1, 2, 3, 4]' | jq '.[.[0]:.[3]]'`.
+  In order for this subtask to count your implementation should handle all JSON values, have all basic filters, and all basic constructors.
+
+* (10 points) Value constructors with filters.
+  This is complementary to the subtask with basic value constructors -- implement the constructors for arrays e.g. `[.items[].name]`, objects (`{user}`, `{(.[]) : null}`).
+  Be warned that this part is harder than it seems and some features interact in a non-obvious way, and not every aspect of behaviour is described precisely in the documentation.
+  In case of doubt, you can experiment with the reference implementation and follow what it does.
+  In order for this subtask to count your implementation should handle all JSON values, have all basic filters, and all object constructors.
+
+* (10 points) [Try-catch expressions](https://jqlang.org/manual/#try-catch) `try op1 catch expr` which tries to execute `op1` and if exception appears, returns `expr`.
   In order for this subtask to count your implementation should handle all JSON values and have all basic filters.
 
-* (20 points) [Variables](https://jqlang.org/manual/#variable-symbolic-binding-operator) `expr as $id | op`, which allow you to bind the value expr to identifier `id` before passing it further to `op`.  
-  * (10 points) Binding names. In this subtask you only have to implement basic variable binding, `expr as $id`.  
+* (10 points) [Name binding](https://jqlang.org/manual/#variable-symbolic-binding-operator) `expr as $id | op`, which allow you to bind the value expr to identifier `id` before passing it further to `op`. For this subtask you only have to implement basic variable binding, `expr as $id`.
     In order for this subtask to count your implementation should handle all JSON values and have all basic filters.
-  * (10 points) Pattern-matching binding. In the manual this is referred to as "destructing". This requires you to bind multiple variables within the same patter. For example `expr as {username: $name, posts : [$fpost, $spost]} | op`, which will destruct object geneerated by expression and make variables `name`, `fpost`, and `spost` available in `op`.  
+
+### Challenge tasks
+
+To get a grade above 8.5, your implementation should also include at least one of the following tasks.
+
+* (10 points) Pattern-matching binding. In the manual this is referred to as "destructing". This requires you to bind multiple variables within the same pattern. For example `expr as {username: $name, posts : [$fpost, $spost]} | op`, which will destruct object generated by expression and make variables `name`, `fpost`, and `spost` available in `op`.
     In order for this subtask to count, you should have regular name-binding from the previous subtask and simple value constructors implemented.
 
 * (15 points) [Reduction operator](https://jqlang.org/manual/#reduce) `reduce`, which corresponds to a fold over results returned by the previous operation.  
