@@ -1,3 +1,6 @@
+variables:
+  DOCKER_AUTH_CONFIG: '{ "auths": { "$CI_REGISTRY": { "auth": "$(echo -n $CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD | base64 -w 0)" } } }'
+
 default:
   image: gitlab.ewi.tudelft.nl/cse3100/admin/docker-ci-image-builder@sha256:3559e6d25fd2ccd6d069bcbb405d378c6cdad5f1aabc863ba58c2b65c80e2227
 
