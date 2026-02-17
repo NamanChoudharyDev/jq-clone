@@ -105,7 +105,7 @@ We recommend you complete at least 65 points of the basic tasks before moving on
 
    Please also note that since for grading purposes we will be test your program as whole, we have to rely heavily on the correctness of implementation for pretty-printing and parsing. So while this task might seem relatively easy, a big part of your grade depends on it transitively.
 
-3. (45 points total) Implement all [basic filters](https://jqlang.org/manual/#basic-filters).
+3. (48 points total) Implement all [basic filters](https://jqlang.org/manual/#basic-filters).
    In particular:
    1. (0 points) Identity filter `.`, which returns an object given to it.
    2. (2 point)  Parenthesis '()', used for grouping operations.
