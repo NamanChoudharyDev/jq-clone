@@ -50,14 +50,14 @@ data-files:          jq.test
 common base-language
   -- Base language which the package is written in.
   default-language:    Haskell2010
-  build-depends:       base >= 4.16 && < 4.20
+  build-depends:       base >= 4.16 && < 4.23
 
 common weekly-tests
   -- common dependencies and config for weekly tests
   import:              base-language
   other-modules:       Paths_JqClone
   build-depends:       deepseq          >= 1.4  && < 1.6,
-                       QuickCheck       >= 2.13 && < 2.16,
+                       QuickCheck       >= 2.13 && < 2.18,
                        tasty            >= 1.4  && < 1.6,
                        tasty-quickcheck >= 0.9  && < 0.12,
                        JqClone
@@ -136,5 +136,5 @@ Test-Suite unit-tests
   other-modules:       JParserTest
                        CParserTest
                        CompileTest
-  build-depends:       QuickCheck       >= 2.13 && < 2.16,
+  build-depends:       QuickCheck       >= 2.13 && < 2.18,
                        tasty-quickcheck >= 0.9  && < 0.12
