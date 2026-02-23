@@ -30,7 +30,7 @@ showHelper num (JObject object) = "{" ++ "\n" ++ formatInput (num + 2) (map show
 formatInput :: Int -> [String] -> String
 formatInput _ [] = ""
 formatInput num [s] = indent num ++ s
-formatInput num (s:ss) = indent num ++ s ++ ",\n" ++ formatInput num ss
+formatInput num (s:ss) = indent num ++ s ++ "," ++ "\n" ++ formatInput num ss
 
 indent :: Int -> String
 indent num = replicate num ' '
