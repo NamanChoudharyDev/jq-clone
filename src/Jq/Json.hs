@@ -59,16 +59,16 @@ jsonNullSC :: JSON
 jsonNullSC = JNull
 
 jsonNumberSC :: Int -> JSON
-jsonNumberSC = undefined
+jsonNumberSC = JNumber . fromIntegral
 
 jsonStringSC :: String -> JSON
-jsonStringSC = undefined
+jsonStringSC = JString
 
 jsonBoolSC :: Bool -> JSON
-jsonBoolSC = undefined
+jsonBoolSC = JBool
 
 jsonArraySC :: [JSON] -> JSON
-jsonArraySC = undefined
+jsonArraySC = JArray
 
 jsonObjectSC :: [(String, JSON)] -> JSON
-jsonObjectSC = undefined
+jsonObjectSC = JObject
