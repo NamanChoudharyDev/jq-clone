@@ -29,7 +29,12 @@ formatInput (s:ss) = s ++ "," ++ formatInput ss
 
 instance Eq JSON where
   JNull == JNull = True
-  _ == _ = undefined
+  (JBool a) == (JBool b) = a == b
+  (JNumber a) == (JNumber b) = a == b
+  (JString a) == (JString b) = a == b
+  (JArray a) == (JArray b) = a == b
+  (JObject a) == (JObject b) = a == b
+  _ == _ = False
 
 encodeUnicode :: Char -> String
 encodeUnicode '\b' = "\\b"
@@ -43,7 +48,7 @@ encodeUnicode c
   | ord c >= 0x80 && ord c <= 0x9f = [c]
   | isControl c = printf "\\u%04x" (ord c)
   | otherwise = [c]
-  
+
 -- Smart constructors
 -- These are included for test purposes and aren't meant to correspond one to one
 -- with the actual constructors of the JSON datatype.
