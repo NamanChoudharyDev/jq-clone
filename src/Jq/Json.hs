@@ -2,6 +2,11 @@ module Jq.Json where
 
 data JSON =
      JNull
+  |  JNumber Double
+  |  JString String     
+  |  JBool Bool
+  |  JArray [JSON]
+  |  Jobject [(String, JSON)] 
 
 instance Show JSON where
   show JNull   = "null"
