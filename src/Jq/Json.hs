@@ -12,20 +12,28 @@ data JSON =
   |  JObject [(String, JSON)] 
 
 instance Show JSON where
-  show JNull = "null"
-  show (JNumber num) = show num
-  show (JString string) = '"': concatMap encodeUnicode string ++ "\""
-  show (JBool True) = "true"
-  show (JBool False) = "false"
-  show (JArray array) = "[" ++ formatInput (map show array) ++ "]"
-  show (JObject object) = "{" ++ formatInput (map showKeyValuePair object) ++ "}"
-    where
-      showKeyValuePair (key, value) = show (JString key) ++ ":" ++ show value  
+  show = showHelper 0  -- Visual Studio Code hlint gave me the eta reduce suggestion (the original line was: show input = showHelper 0 input)
 
-formatInput :: [String] -> String
-formatInput [] = ""
-formatInput [s] = s
-formatInput (s:ss) = s ++ "," ++ formatInput ss
+showHelper :: Int -> JSON -> String
+showHelper _ JNull = "null"
+showHelper _ (JNumber num) = show (round num :: Integer)
+showHelper _ (JString string) = '"': concatMap encodeUnicode string ++ "\""
+showHelper _ (JBool True) = "true"
+showHelper _ (JBool False) = "false"
+showHelper _ (JArray []) = "[]"
+showHelper num (JArray array) = "[" ++ "\n" ++ formatInput (num + 2) (map (showHelper (num + 2)) array) ++ "\n" ++ indent num ++ "]"
+showHelper _ (JObject []) = "{}"
+showHelper num (JObject object) = "{" ++ "\n" ++ formatInput (num + 2) (map showKeyValuePair object) ++ "\n" ++ indent num ++ "}"
+  where
+    showKeyValuePair (key, value) = showHelper (num + 2) (JString key) ++ ": " ++ showHelper (num + 2) value
+
+formatInput :: Int -> [String] -> String
+formatInput _ [] = ""
+formatInput num [s] = indent num ++ s
+formatInput num (s:ss) = indent num ++ s ++ ",\n" ++ formatInput num ss
+
+indent :: Int -> String
+indent num = replicate num ' '
 
 instance Eq JSON where
   JNull == JNull = True
