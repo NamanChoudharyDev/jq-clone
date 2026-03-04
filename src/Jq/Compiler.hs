@@ -7,10 +7,10 @@ import           Jq.Json
 type JProgram a = JSON -> Either String a
 
 compile :: Filter -> JProgram [JSON]
-compile (Identity) inp = return [inp]
+compile Identity inp = return [inp]
 
 compile (StringIndexing _) JNull = return [JNull]
-compile (StringIndexing key) (JObject inp) = 
+compile (StringIndexing key) (JObject inp) =
     case findValueAssociatedToKey key inp of
         Just value -> return [value]
         Nothing -> return [JNull]
@@ -40,4 +40,4 @@ findValueAssociatedToKey key ((k, v):xs)
 
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
-run p j = p j
+run p = p -- VS code recommended that this can be eta reduced by removing the j parameter
