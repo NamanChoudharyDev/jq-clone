@@ -13,6 +13,9 @@ instance Show Filter where
 
 instance Eq Filter where
   Identity == Identity = True
+  (StringIndexing a) == (StringIndexing b) = a == b
+  (Pipe pa pb) == (Pipe pc pd) = pa == pc && pb == pd
+  (Comma ca cb) == (Comma cc cd) = ca == cc && cb == cd
   _ == _ = undefined
 
 newtype Config = ConfigC {filters :: Filter} -- hlint recommmended me to define this with the keyword newtype instead of data. I like not having blue lines in my VS code so I applied it and in the recommendation it said decreases laziness
