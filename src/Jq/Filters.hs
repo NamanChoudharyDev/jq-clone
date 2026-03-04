@@ -15,7 +15,7 @@ instance Eq Filter where
   Identity == Identity = True
   _ == _ = undefined
 
-data Config = ConfigC {filters :: Filter}
+newtype Config = ConfigC {filters :: Filter} -- hlint recommmended me to define this with the keyword newtype instead of data. I like not having blue lines in my VS code so I applied it and in the recommendation it said decreases laziness
 
 -- Smart constructors
 -- These are included for test purposes and
