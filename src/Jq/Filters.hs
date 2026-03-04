@@ -1,6 +1,9 @@
 module Jq.Filters where
 
 data Filter = Identity
+  | Indexing String
+  | Pipe Filter Filter
+  | Comma Filter Filter
 
 instance Show Filter where
   show (Identity) = "."
