@@ -17,8 +17,8 @@ compile (StringIndexing key) (JObject inp) =
 compile (StringIndexing _) _ = Left "The argument was a Json type that is not indexable with the a key"
 
 compile (Pipe p1 p2) inp = do
-    firstPipe <- compile p1 inp
-    pipeHelper firstPipe
+    firstPipeFilter <- compile p1 inp
+    pipeHelper firstPipeFilter
     where
         pipeHelper [] = return []
         pipeHelper (x:xs) = do
@@ -26,13 +26,18 @@ compile (Pipe p1 p2) inp = do
             zs <- pipeHelper xs
             return (ys ++ zs)
 
+compile (Comma c1 c2) inp = do
+    firstCommaFilter <- compile c1 inp
+    secondCommaFilter <- compile c2 inp
+    return (firstCommaFilter ++ secondCommaFilter)
 
-
+----------------------------------------------------------------------------------------------------------------------------------
 findValueAssociatedToKey :: Eq a => a -> [(a, b)] -> Maybe b
 findValueAssociatedToKey _ [] = Nothing
 findValueAssociatedToKey key ((k, v):xs)
     | key == k = Just v
     | otherwise = findValueAssociatedToKey key xs
+
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
 run p j = p j
