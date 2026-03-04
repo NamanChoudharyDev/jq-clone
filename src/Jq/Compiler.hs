@@ -15,7 +15,7 @@ compile (StringIndexing key) (JObject inp) =
     case findValueAssociatedToKey key inp of
         Just value -> return [value]
         Nothing -> return [Jnull]
-compile (StringIndexing key) _ = Left "You passed a Json type that is not indexebl"
+compile (StringIndexing key) _ = Left "The argument was a Json type that is not indexable with the a key"
 
 
 findValueAssociatedToKey :: Eq a => a -> [(a, b)] -> Maybe b
