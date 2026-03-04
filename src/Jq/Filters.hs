@@ -30,10 +30,10 @@ filterIdentitySC :: Filter
 filterIdentitySC = Identity
 
 filterStringIndexingSC :: String -> Filter
-filterStringIndexingSC = undefined
+filterStringIndexingSC = StringIndexing
 
 filterPipeSC :: Filter -> Filter -> Filter
-filterPipeSC = undefined
+filterPipeSC = Pipe
 
 filterCommaSC :: Filter -> Filter -> Filter
-filterCommaSC = undefined
+filterCommaSC = Comma
