@@ -2,7 +2,6 @@ module Jq.Compiler where
 
 import           Jq.Filters
 import           Jq.Json
-import Data.Foldable (find)
 
 
 type JProgram a = JSON -> Either String a
@@ -10,12 +9,23 @@ type JProgram a = JSON -> Either String a
 compile :: Filter -> JProgram [JSON]
 compile (Identity) inp = return [inp]
 
-compile (StringIndexing key) JNull = return [Jnull]
+compile (StringIndexing _) JNull = return [JNull]
 compile (StringIndexing key) (JObject inp) = 
     case findValueAssociatedToKey key inp of
         Just value -> return [value]
-        Nothing -> return [Jnull]
-compile (StringIndexing key) _ = Left "The argument was a Json type that is not indexable with the a key"
+        Nothing -> return [JNull]
+compile (StringIndexing _) _ = Left "The argument was a Json type that is not indexable with the a key"
+
+compile (Pipe p1 p2) inp = do
+    firstPipe <- compile p1 inp
+    pipeHelper firstPipe
+    where
+        pipeHelper [] = return []
+        pipeHelper (x:xs) = do
+            ys <- compile p2 x
+            zs <- pipeHelper xs
+            return (ys ++ zs)
+
 
 
 findValueAssociatedToKey :: Eq a => a -> [(a, b)] -> Maybe b
