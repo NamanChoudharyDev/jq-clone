@@ -6,7 +6,10 @@ data Filter = Identity
   | Comma Filter Filter
 
 instance Show Filter where
-  show (Identity) = "."
+  show Identity = "."
+  show (Indexing key) = "." ++ show key
+  show (Pipe p1 p2) = show p1 ++ " | " ++ show p2
+  show (Comma c1 c2) = show c1 ++ " , " ++ show c2
 
 instance Eq Filter where
   Identity == Identity = True
