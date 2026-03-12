@@ -8,7 +8,7 @@ skip :: Parser String
 skip = return ""
 
 nonZeroDigit :: Char -> Bool
-nonZeroDigit d = (isDigit d) && (d /= '0')
+nonZeroDigit d = isDigit d && (d /= '0')
 
 regularNumber :: Parser String
 regularNumber = do
@@ -21,11 +21,11 @@ regularNumber = do
 p1 <&> p2 = liftA2 (++) p1 p2
 
 satString :: (Char -> Bool) -> Parser String
-satString predicate = (:[]) <$> (sat predicate)
+satString predicate = (:[]) <$> sat predicate
 
 -- Parse raw number, but return as a string to map into appropriate type
 rawNumber :: Parser String
-rawNumber = ((string "-") <|> skip         )                     <&>
+rawNumber = (string "-" <|> skip         )                     <&>
             (string "0"   <|> regularNumber)                     <&>
             ((string "."  <&> some digit   ) <|> skip)           <&>
             (((string "E" <|> string "e")                        <&>
@@ -47,16 +47,16 @@ escapeSequence = char '"'            <|>
                  ('\n' <$ char 'n')  <|>
                  ('\r' <$ char 'r')  <|>
                  ('\t' <$ char 't')  <|>
-                 char 'u' *> ((chr . hexStringToInt) <$> (satString isHexDigit <&> satString isHexDigit <&> satString isHexDigit <&> satString isHexDigit))
+                 char 'u' *> (chr . hexStringToInt <$> (satString isHexDigit <&> satString isHexDigit <&> satString isHexDigit <&> satString isHexDigit))
 
 stringAtom :: Parser Char
-stringAtom = (sat regularStringChar) <|> (char '\\' *> escapeSequence)
+stringAtom = sat regularStringChar <|> (char '\\' *> escapeSequence)
     where
         regularStringChar p
             | p == '"'     = False
             | p == '\\'    = False
-            | isControl(p) = False
+            | isControl p = False
             | otherwise    = True
 
 escapedString :: Parser String
-escapedString = char '"' *> (many stringAtom) <* char '"'
+escapedString = char '"' *> many stringAtom <* char '"'
