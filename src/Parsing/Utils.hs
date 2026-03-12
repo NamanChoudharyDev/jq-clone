@@ -32,11 +32,10 @@ rawNumber = (string "-" <|> skip         )                     <&>
             (string "-"   <|> string "+" <|> skip) <&> some digit) <|> skip)
 
 hexStringToInt' :: Int -> String -> Int
-hexStringToInt' n []     = n
-hexStringToInt' n (x:xs) = hexStringToInt' (16 * n + digitToInt x) xs
+hexStringToInt' = foldl (\ n x -> 16 * n + digitToInt x) -- Applied suggestion of VS code that it can be written with foldl and applied eta reduce
 
 hexStringToInt :: String -> Int
-hexStringToInt xs = hexStringToInt' 0 xs
+hexStringToInt = hexStringToInt' 0 -- Applied eta reduce to this line, to get rid of the VS code blue line suggestion
 
 escapeSequence :: Parser Char
 escapeSequence = char '"'            <|>
