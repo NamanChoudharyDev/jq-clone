@@ -13,5 +13,8 @@ parseJString = JString <$> escapedString
 parseJNumber :: Parser JSON
 parseJNumber = JNumber . read <$> rawNumber
 
+parseJBool :: Parser JSON
+parseJBool = (JBool True <$ string "true") <|> (JBool False <$ string "false")
+
 parseJSON :: Parser JSON
-parseJSON = token $ parseJNull <|> parseJNumber <|> parseJString
+parseJSON = token $ parseJNull <|> parseJNumber <|> parseJString <|> parseJBool
