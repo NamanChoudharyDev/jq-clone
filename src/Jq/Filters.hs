@@ -7,7 +7,7 @@ data Filter = Identity
 
 instance Show Filter where
   show Identity = "."
-  show (StringIndexing key) = "." ++ show key
+  show (StringIndexing key) = "." ++ key
   show (Pipe p1 p2) = show p1 ++ " | " ++ show p2
   show (Comma c1 c2) = show c1 ++ " , " ++ show c2
 
