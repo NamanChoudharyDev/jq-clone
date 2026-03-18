@@ -33,6 +33,22 @@ parseNonEmptyArray = do
   _ <- token (char ']')
   return (JArray (x : xs))
 
+parseJObject :: Parser JSON
+parseJObject = parseEmptyObject <|> parseNonEmptyObject
+
+parseEmptyObject :: Parser JSON
+parseEmptyObject = do
+    _ <- token (char '{')
+    _ <- token (char '}')
+    return (JObject [])
+
+parseNonEmptyObject :: Parser JSON
+parseNonEmptyObject = do
+  _ <- token (char '{')
+  p <- parsePair
+  ps <- many (token (char ',') *> parsePair)
+  _ <- token (char '}')
+  return (JObject (p : ps))
 
 parsePair :: Parser (String, JSON)
 parsePair = do
@@ -42,4 +58,4 @@ parsePair = do
   return (key, value)
 
 parseJSON :: Parser JSON
-parseJSON = token $ parseJNull <|> parseJNumber <|> parseJString <|> parseJBool <|> parseJArray
+parseJSON = token $ parseJNull <|> parseJNumber <|> parseJString <|> parseJBool <|> parseJArray <|> parseJObject
