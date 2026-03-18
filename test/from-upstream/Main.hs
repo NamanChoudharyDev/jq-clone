@@ -108,7 +108,7 @@ prettifyJSON s = do
                $ setStdout byteStringOutput
                $ (shell "jq --sort-keys -M \".\"")
   bv <- withProcessWait_ jqconfig (\ p -> atomically (getStdout p))
-  return $ toString bv
+  return . filter (/= '\r') . toString $ bv
 -- if you're on Windows and see problems with \r character consider
 -- swapping the line above for
 -- return . filter (/= '\r') . toString $ bv
