@@ -33,5 +33,13 @@ parseNonEmptyArray = do
   _ <- token (char ']')
   return (JArray (x : xs))
 
+
+parsePair :: Parser (String, JSON)
+parsePair = do
+  key <- token escapedString
+  _ <- token (char ':')
+  value <- parseJSON
+  return (key, value)
+
 parseJSON :: Parser JSON
 parseJSON = token $ parseJNull <|> parseJNumber <|> parseJString <|> parseJBool <|> parseJArray
