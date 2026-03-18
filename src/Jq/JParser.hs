@@ -45,13 +45,13 @@ parseEmptyObject = do
 parseNonEmptyObject :: Parser JSON
 parseNonEmptyObject = do
   _ <- token (char '{')
-  p <- parsePair
-  ps <- many (token (char ',') *> parsePair)
+  p <- parseKeyValue
+  ps <- many (token (char ',') *> parseKeyValue)
   _ <- token (char '}')
   return (JObject (p : ps))
 
-parsePair :: Parser (String, JSON)
-parsePair = do
+parseKeyValue :: Parser (String, JSON)
+parseKeyValue = do
   key <- token escapedString
   _ <- token (char ':')
   value <- parseJSON
