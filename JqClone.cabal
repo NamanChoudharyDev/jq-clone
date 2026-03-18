@@ -86,7 +86,7 @@ library
                        Jq.Parser
   -- Or here, if you don't need to import them in tests
   other-modules:
-
+                       Parsing.Utils
   -- Libraries other than mentioned below aren't allowed
   build-depends:
                        -- Uncomment if needed:

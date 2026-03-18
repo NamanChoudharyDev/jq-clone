@@ -16,7 +16,9 @@ instance Show JSON where
 
 showHelper :: Int -> JSON -> String
 showHelper _ JNull = "null"
-showHelper _ (JNumber num) = show (round num :: Integer)
+showHelper _ (JNumber num)
+  | num == fromInteger (round num) = show (round num :: Integer)
+  | otherwise = show num
 showHelper _ (JString string) = '"': concatMap encodeUnicode string ++ "\""
 showHelper _ (JBool True) = "true"
 showHelper _ (JBool False) = "false"
