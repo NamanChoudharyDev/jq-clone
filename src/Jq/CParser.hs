@@ -8,8 +8,23 @@ parseIdentity = do
   _ <- token . char $ '.'
   return Identity
 
+
+  {-
+  For this parser my VS code said my code:
+    key <- ident
+    return (StringIndexing key)
+  can be simplified to:
+  StringIndexing <$> ident
+  I applied this
+  -}
+parseStringIndexing :: Parser Filter
+parseStringIndexing = do
+  _ <- token . char $ '.'
+  StringIndexing <$> ident
+
+
 parseFilter :: Parser Filter
-parseFilter = parseIdentity
+parseFilter = parseStringIndexing <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
@@ -20,3 +35,12 @@ parseConfig s = case s of
         [] -> Right . ConfigC $ v
         _ -> Left $ "Compilation error, leftover: " ++ out
       e -> Left $ "Compilation error: " ++ show e
+
+-- >>> parse parseFilter ".foo"
+-- [(.foo,"")]
+
+-- >>> parse parseFilter ".foo_bar"
+-- [(.foo_bar,"")]
+
+-- >>>  parse parseFilter "."
+-- [(.,"")]
