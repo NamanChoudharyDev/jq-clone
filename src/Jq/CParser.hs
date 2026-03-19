@@ -17,14 +17,14 @@ parseIdentity = do
   StringIndexing <$> ident
   I applied this
   -}
-parseStringIndexing :: Parser Filter
-parseStringIndexing = do
+parseIdentifierIndexing :: Parser Filter
+parseIdentifierIndexing = do
   _ <- token . char $ '.'
   StringIndexing <$> ident
 
 
 parseFilter :: Parser Filter
-parseFilter = parseStringIndexing <|> parseIdentity
+parseFilter = parseIdentifierIndexing <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
