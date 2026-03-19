@@ -32,7 +32,7 @@ parseGenericIndexing = do
 
 {-
 Again my Hlint gave me the suggestion to turn this code:
-  right <- parseFilter
+  right <- parseFilter -- Used an LLM to get the idea of recursively parsing
   return (Pipe left right)
 to this:
   Pipe left <$> parseFilter
@@ -43,8 +43,14 @@ parsePipe = do
   _ <- token (char '|')
   Pipe left <$> parseFilter
 
+parseComma :: Parser Filter
+parseComma = do
+  left <- parsePipe <|> parseGenericIndexing <|> parseIdentifierIndexing <|> parseIdentity
+  _ <- token (char ',')
+  Comma left <$> parseFilter
+
 parseFilter :: Parser Filter
-parseFilter = parsePipe <|> parseGenericIndexing <|> parseIdentifierIndexing <|> parseIdentity
+parseFilter = parseComma <|> parsePipe <|> parseGenericIndexing <|> parseIdentifierIndexing <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
