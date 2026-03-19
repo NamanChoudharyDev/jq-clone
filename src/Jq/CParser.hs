@@ -2,6 +2,7 @@ module Jq.CParser where
 
 import Parsing.Parsing
 import Jq.Filters
+import Parsing.Utils
 
 parseIdentity :: Parser Filter
 parseIdentity = do
@@ -22,9 +23,16 @@ parseIdentifierIndexing = do
   _ <- token . char $ '.'
   StringIndexing <$> ident
 
+parseGenericIndexing :: Parser Filter
+parseGenericIndexing = do
+  _ <- token . char $ '.'
+  _ <- token (char '[')
+  key <- token escapedString
+  _ <- token (char ']')
+  return (StringIndexing key)
 
 parseFilter :: Parser Filter
-parseFilter = parseIdentifierIndexing <|> parseIdentity
+parseFilter = parseGenericIndexing <|> parseIdentifierIndexing <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
@@ -35,12 +43,3 @@ parseConfig s = case s of
         [] -> Right . ConfigC $ v
         _ -> Left $ "Compilation error, leftover: " ++ out
       e -> Left $ "Compilation error: " ++ show e
-
--- >>> parse parseFilter ".foo"
--- [(.foo,"")]
-
--- >>> parse parseFilter ".foo_bar"
--- [(.foo_bar,"")]
-
--- >>>  parse parseFilter "."
--- [(.,"")]
