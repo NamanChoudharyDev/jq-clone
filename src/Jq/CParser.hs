@@ -32,7 +32,7 @@ parseGenericIndexing = do
 
 {-
 Again my Hlint gave me the suggestion to turn this code:
-  right <- parseFilter -- Used an LLM to get the idea of recursively parsing
+  right <- parseFilter -- Used a LLM to get the idea of recursively parsing
   return (Pipe left right)
 to this:
   Pipe left <$> parseFilter
