@@ -30,6 +30,29 @@ parseGenericIndexing = do
   _ <- token (char ']')
   return (StringIndexing key)
 
+parseStringIndexing :: Parser Filter
+parseStringIndexing = do
+  _ <- token (char '.')
+  StringIndexing <$> token escapedString
+
+{-
+I first had a function filterChaining defined as so:
+chainFilters :: Filter -> [Filter] -> Filter
+chainFilters f [] = f
+chainFilters f (i:is) = chainFilters (Pipe f i) is
+
+and implemented the last line of parseChainedIndexing as the following:
+  return (filterChaining firstIndex chainedIndexes)
+
+but then VS code stepped in and said yo just use foldl and then I just removed this helper entirely,
+and used foldl inside of parseChainedIndexing
+-}
+parseChainedIndexing :: Parser Filter
+parseChainedIndexing = do
+  firstIndex <- parseGenericIndexing <|> parseStringIndexing <|> parseIdentifierIndexing
+  chainedIndexes <- many (parseGenericIndexing <|> parseStringIndexing <|> parseIdentifierIndexing)
+  return (foldl Pipe firstIndex chainedIndexes)
+
 {-
 Again my Hlint gave me the suggestion to turn this code:
   right <- parseFilter -- Used a LLM to get the idea of recursively parsing
@@ -39,18 +62,18 @@ to this:
 -}
 parsePipe :: Parser Filter
 parsePipe = do
-  left <- parseGenericIndexing <|> parseIdentifierIndexing <|> parseIdentity
+  left <- parseChainedIndexing <|> parseIdentity
   _ <- token (char '|')
   Pipe left <$> parseFilter
 
 parseComma :: Parser Filter
 parseComma = do
-  left <- parsePipe <|> parseGenericIndexing <|> parseIdentifierIndexing <|> parseIdentity
+  left <- parsePipe <|> parseChainedIndexing <|> parseIdentity
   _ <- token (char ',')
   Comma left <$> parseFilter
 
 parseFilter :: Parser Filter
-parseFilter = parseComma <|> parsePipe <|> parseGenericIndexing <|> parseIdentifierIndexing <|> parseIdentity
+parseFilter = parseComma <|> parsePipe <|> parseChainedIndexing <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
