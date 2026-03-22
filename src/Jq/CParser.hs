@@ -22,6 +22,13 @@ parseIdentifierIndexing = do
   _ <- token . char $ '.'
   StringIndexing <$> ident
 
+parseOptionalIdentifierIndexing :: Parser Filter
+parseOptionalIdentifierIndexing = do
+  _ <- token . char $ '.'
+  key <- ident
+  _ <- token (char '?')
+  return (OptionalObjectIndexing key)
+
 parseGenericIndexing :: Parser Filter
 parseGenericIndexing = do
   _ <- token . char $ '.'
@@ -30,10 +37,26 @@ parseGenericIndexing = do
   _ <- token (char ']')
   return (StringIndexing key)
 
+parseOptionalGenericIndexing :: Parser Filter
+parseOptionalGenericIndexing = do
+  _ <- token . char $ '.'
+  _ <- token (char '[')
+  key <- token escapedString
+  _ <- token (char ']')
+  _ <- token (char '?')
+  return (OptionalObjectIndexing key)
+
 parseStringIndexing :: Parser Filter
 parseStringIndexing = do
-  _ <- token (char '.')
+  _ <- token . char $ '.'
   StringIndexing <$> token escapedString
+
+parseOptionalStringIndexing :: Parser Filter
+parseOptionalStringIndexing = do
+  _ <- token . char $ '.'
+  key <- token escapedString
+  _ <- token (char '?')
+  return (OptionalObjectIndexing key)
 
 {-
 I first had a function filterChaining defined as so:
@@ -49,7 +72,7 @@ and used foldl inside of parseChainedIndexing
 -}
 parseChainedIndexing :: Parser Filter
 parseChainedIndexing = do
-  firstIndex <- parseGenericIndexing <|> parseStringIndexing <|> parseIdentifierIndexing
+  firstIndex <- parseOptionalGenericIndexing <|> parseGenericIndexing <|> parseOptionalStringIndexing <|> parseStringIndexing <|> parseOptionalIdentifierIndexing <|> parseIdentifierIndexing
   chainedIndexes <- many (parseGenericIndexing <|> parseStringIndexing <|> parseIdentifierIndexing)
   return (foldl Pipe firstIndex chainedIndexes)
 

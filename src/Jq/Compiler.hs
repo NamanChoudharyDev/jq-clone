@@ -16,6 +16,13 @@ compile (StringIndexing key) (JObject inp) =
         Nothing -> return [JNull]
 compile (StringIndexing _) _ = Left "The argument was a JSON type that is not indexable with a key"
 
+compile (OptionalObjectIndexing _) JNull = return [JNull]
+compile (OptionalObjectIndexing key) (JObject inp) =
+    case lookup key inp of
+        Just value -> return [value]
+        Nothing -> return [JNull]
+compile (OptionalObjectIndexing _) _ = return []
+
 compile (Pipe p1 p2) inp = do
     firstPipeFilter <- compile p1 inp
     pipeHelper firstPipeFilter

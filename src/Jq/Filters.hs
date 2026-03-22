@@ -2,18 +2,21 @@ module Jq.Filters where
 
 data Filter = Identity
   | StringIndexing String
+  | OptionalObjectIndexing String
   | Pipe Filter Filter
   | Comma Filter Filter
 
 instance Show Filter where
   show Identity = "."
   show (StringIndexing key) = "." ++ key
+  show (OptionalObjectIndexing key) = "." ++ key ++ "?"
   show (Pipe p1 p2) = show p1 ++ " | " ++ show p2
   show (Comma c1 c2) = show c1 ++ " , " ++ show c2
 
 instance Eq Filter where
   Identity == Identity = True
   (StringIndexing a) == (StringIndexing b) = a == b
+  (OptionalObjectIndexing a) == (OptionalObjectIndexing b) = a == b
   (Pipe pa pb) == (Pipe pc pd) = pa == pc && pb == pd
   (Comma ca cb) == (Comma cc cd) = ca == cc && cb == cd
   _ == _ = False
