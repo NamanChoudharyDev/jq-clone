@@ -11,7 +11,7 @@ compile Identity inp = return [inp]
 
 compile (StringIndexing _) JNull = return [JNull]
 compile (StringIndexing key) (JObject inp) =
-    case findValueAssociatedToKey key inp of
+    case lookup key inp of
         Just value -> return [value]
         Nothing -> return [JNull]
 compile (StringIndexing _) _ = Left "The argument was a JSON type that is not indexable with a key"
@@ -30,14 +30,6 @@ compile (Comma c1 c2) inp = do
     firstCommaFilter <- compile c1 inp
     secondCommaFilter <- compile c2 inp
     return (firstCommaFilter ++ secondCommaFilter)
-
-----------------------------------------------------------------------------------------------------------------------------------
-findValueAssociatedToKey :: Eq a => a -> [(a, b)] -> Maybe b
-findValueAssociatedToKey _ [] = Nothing
-findValueAssociatedToKey key ((k, v):xs)
-    | key == k = Just v
-    | otherwise = findValueAssociatedToKey key xs
-
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
 run p = p -- VS code recommended that this can be eta reduced by removing the j parameter
