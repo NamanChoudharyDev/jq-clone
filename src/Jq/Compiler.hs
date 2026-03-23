@@ -23,6 +23,16 @@ compile (OptionalObjectIndexing key) (JObject inp) =
         Nothing -> return [JNull]
 compile (OptionalObjectIndexing _) _ = return []
 
+compile (ArrayIndexing _) JNull = return [JNull]
+compile (ArrayIndexing i) (JArray xs)
+    | index >= 0 && index < n = return [xs !! index]
+    | otherwise = return [JNull]
+    where
+        n = length xs
+        index = if i < 0 then n + i else i
+compile (ArrayIndexing _) _ =
+    Left "The argument was a JSON type that is not indexable with an array index"
+
 compile (Pipe p1 p2) inp = do
     firstPipeFilter <- compile p1 inp
     pipeHelper firstPipeFilter
