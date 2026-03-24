@@ -56,7 +56,7 @@ compile (Comma c1 c2) inp = do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 sliceArray :: Int -> Int -> [JSON] -> [JSON]
 sliceArray i j xs
-    | start >= end = []
+    | putStartInBounds >= putEndInBounds = []
     | otherwise = take (putEndInBounds - putStartInBounds) (drop putStartInBounds xs)
   where
     n = length xs
