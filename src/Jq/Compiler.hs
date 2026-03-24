@@ -54,14 +54,21 @@ compile (Comma c1 c2) inp = do
     return (firstCommaFilter ++ secondCommaFilter)
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
-sliceArray :: Int -> Int -> [JSON] -> [JSON]
+sliceArray :: Maybe Int -> Maybe Int -> [JSON] -> [JSON]
 sliceArray i j xs
     | putStartInBounds >= putEndInBounds = []
     | otherwise = take (putEndInBounds - putStartInBounds) (drop putStartInBounds xs)
   where
     n = length xs
-    start = if i < 0 then n + i else i
-    end = if j < 0 then n + j else j
+
+    start = case i of
+        Nothing -> 0
+        Just k -> if k < 0 then n + k else k
+
+    end = case j of
+        Nothing -> n
+        Just k -> if k < 0 then n + k else k
+
     putStartInBounds = max 0 (min n start)
     putEndInBounds = max 0 (min n end)
 

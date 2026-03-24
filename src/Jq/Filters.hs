@@ -4,7 +4,7 @@ data Filter = Identity
   | StringIndexing String
   | OptionalObjectIndexing String
   | ArrayIndexing Int
-  | ArraySlicing Int Int
+  | ArraySlicing (Maybe Int) (Maybe Int)
   | Pipe Filter Filter
   | Comma Filter Filter
 
@@ -13,7 +13,11 @@ instance Show Filter where
   show (StringIndexing key) = "." ++ key
   show (OptionalObjectIndexing key) = "." ++ key ++ "?"
   show (ArrayIndexing i) = ".[" ++ show i ++ "]"
-  show (ArraySlicing i j) = ".[" ++ show i ++ ":" ++ show j ++ "]"
+  show (ArraySlicing i j) = ".[" ++ showOptional i ++ ":" ++ showOptional j ++ "]"
+    where
+      showOptional :: Maybe Int -> String
+      showOptional Nothing = ""
+      showOptional (Just x) = show x  
   show (Pipe p1 p2) = show p1 ++ " | " ++ show p2
   show (Comma c1 c2) = show c1 ++ " , " ++ show c2
 

@@ -68,11 +68,11 @@ parseArrayIndexing = do
 
 parseArraySlicing :: Parser Filter
 parseArraySlicing = do
-  _ <- token . char $ '.' 
+  _ <- token (char '.')
   _ <- token (char '[')
-  i <- integer
+  i <- optional integer
   _ <- token (char ':')
-  j <- integer
+  j <- optional integer
   _ <- token (char ']')
   return (ArraySlicing i j)
 
