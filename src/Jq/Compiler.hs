@@ -33,6 +33,11 @@ compile (ArrayIndexing i) (JArray xs)
 compile (ArrayIndexing _) _ =
     Left "The argument was a JSON type that is not indexable with an array index"
 
+compile (ArraySlicing _ _) JNull = return [JNull]
+compile (ArraySlicing i j) (JArray xs) = return [JArray (sliceArray i j xs)]
+compile (ArraySlicing _ _) _ =
+    Left "The argument was a JSON type that is not sliceable"
+
 compile (Pipe p1 p2) inp = do
     firstPipeFilter <- compile p1 inp
     pipeHelper firstPipeFilter
@@ -47,6 +52,16 @@ compile (Comma c1 c2) inp = do
     firstCommaFilter <- compile c1 inp
     secondCommaFilter <- compile c2 inp
     return (firstCommaFilter ++ secondCommaFilter)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+sliceArray :: Int -> Int -> [JSON] -> [JSON]
+sliceArray i j xs
+    | start >= end = []
+    | otherwise = take (end - start) (drop start xs)
+  where
+    n = length xs
+    start = if i < 0 then n + i else i
+    end = if j < 0 then n + j else j
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
 run p = p -- VS code recommended that this can be eta reduced by removing the j parameter
