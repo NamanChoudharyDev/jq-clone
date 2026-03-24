@@ -57,11 +57,13 @@ compile (Comma c1 c2) inp = do
 sliceArray :: Int -> Int -> [JSON] -> [JSON]
 sliceArray i j xs
     | start >= end = []
-    | otherwise = take (end - start) (drop start xs)
+    | otherwise = take (putEndInBounds - putStartInBounds) (drop putStartInBounds xs)
   where
     n = length xs
     start = if i < 0 then n + i else i
     end = if j < 0 then n + j else j
+    putStartInBounds = max 0 (min n start)
+    putEndInBounds = max 0 (min n end)
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
 run p = p -- VS code recommended that this can be eta reduced by removing the j parameter
