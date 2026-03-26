@@ -40,6 +40,7 @@ compile (ArraySlicing i j) (JArray xs) = return [JArray (sliceArray i j xs)]
 compile (ArraySlicing _ _) _ =
     Left "The argument was a JSON type that is not sliceable"
 
+compile FullIterator JNull = return [JNull]
 compile FullIterator (JArray xs) = return xs
 compile FullIterator (JObject inp) = return (map snd inp)
 compile FullIterator _ = Left "The argument was a JSON type that is not iterable"
