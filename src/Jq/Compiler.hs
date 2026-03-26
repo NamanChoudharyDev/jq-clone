@@ -9,6 +9,8 @@ type JProgram a = JSON -> Either String a
 compile :: Filter -> JProgram [JSON]
 compile Identity inp = return [inp]
 
+compile (Parenthesis f) inp = compile f inp
+
 compile (StringIndexing _) JNull = return [JNull]
 compile (StringIndexing key) (JObject inp) =
     case lookup key inp of
@@ -68,7 +70,7 @@ sliceArray i j xs
     end = case j of
         Nothing -> n
         Just k -> if k < 0 then n + k else k
-
+    -- Used a LLM to generate test cases to debug to find this fix for putting the indices always in bounds (the LLM did not write the code it just provided me test inputs that should pass in jq)
     putStartInBounds = max 0 (min n start)
     putEndInBounds = max 0 (min n end)
 

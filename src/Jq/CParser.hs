@@ -9,6 +9,13 @@ parseIdentity = do
   _ <- token . char $ '.'
   return Identity
 
+parseParenthesis :: Parser Filter
+parseParenthesis = do
+  _ <- token (char '(')
+  p <- parseFilter
+  _ <- token (char ')')
+  return (Parenthesis p)
+
 {-
   For this parser my VS code said my code:
     key <- ident
@@ -103,18 +110,18 @@ to this:
 -}
 parsePipe :: Parser Filter
 parsePipe = do
-  left <- parseChainedIndexing <|> parseIdentity
+  left <- parseParenthesis <|> parseChainedIndexing <|> parseIdentity
   _ <- token (char '|')
   Pipe left <$> parseFilter
 
 parseComma :: Parser Filter
 parseComma = do
-  left <- parsePipe <|> parseChainedIndexing <|> parseIdentity
+  left <- parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
   _ <- token (char ',')
   Comma left <$> parseFilter
 
 parseFilter :: Parser Filter
-parseFilter = parseComma <|> parsePipe <|> parseChainedIndexing <|> parseIdentity
+parseFilter = parseComma <|> parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of

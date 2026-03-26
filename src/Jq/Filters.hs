@@ -1,6 +1,7 @@
 module Jq.Filters where
 
 data Filter = Identity
+  | Parenthesis Filter
   | StringIndexing String
   | OptionalObjectIndexing String
   | ArrayIndexing Int
@@ -10,6 +11,7 @@ data Filter = Identity
 
 instance Show Filter where
   show Identity = "."
+  show (Parenthesis p) = "(" ++ show p ++ ")"
   show (StringIndexing key) = "." ++ key
   show (OptionalObjectIndexing key) = "." ++ key ++ "?"
   show (ArrayIndexing i) = ".[" ++ show i ++ "]"
@@ -23,10 +25,11 @@ instance Show Filter where
 
 instance Eq Filter where
   Identity == Identity = True
+  (Parenthesis a) == (Parenthesis b) = a == b
   (StringIndexing a) == (StringIndexing b) = a == b
   (OptionalObjectIndexing a) == (OptionalObjectIndexing b) = a == b
-  ArrayIndexing a == ArrayIndexing b = a == b
-  ArraySlicing sa sb == ArraySlicing sc sd = sa == sc && sb == sd
+  (ArrayIndexing a) == (ArrayIndexing b) = a == b
+  (ArraySlicing sa sb) == (ArraySlicing sc sd) = sa == sc && sb == sd
   (Pipe pa pb) == (Pipe pc pd) = pa == pc && pb == pd
   (Comma ca cb) == (Comma cc cd) = ca == cc && cb == cd
   _ == _ = False
