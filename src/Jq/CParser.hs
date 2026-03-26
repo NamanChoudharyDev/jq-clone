@@ -207,14 +207,12 @@ parsePipe = do
 
 parseComma :: Parser Filter
 parseComma = do
-  firstFilter <- parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
-  otherFilters <- many (do
-    _ <- token (char ',')
-    parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity)
-  return (foldl Comma firstFilter otherFilters)
+  left <- parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
+  _ <- token (char ',')
+  Comma left <$> parseFilter
 
 parseFilter :: Parser Filter
-parseFilter = parseComma <|> parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
+parseFilter = parsePipe <|> parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
