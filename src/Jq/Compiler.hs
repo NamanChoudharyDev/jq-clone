@@ -40,6 +40,13 @@ compile (ArraySlicing i j) (JArray xs) = return [JArray (sliceArray i j xs)]
 compile (ArraySlicing _ _) _ =
     Left "The argument was a JSON type that is not sliceable"
 
+compile FullIterator (JArray xs) = return xs
+compile FullIterator (JObject inp) = return (map snd inp)
+compile FullIterator _ = Left "The argument was a JSON type that is not iterable"
+
+compile (ValueIterator iter) (JArray xs) = return (arrayIteratorHelper iter xs)
+compile (ValueIterator _) _ = Left "The argument was a JSON type that is not iterable with the value iterator"
+
 compile (Pipe p1 p2) inp = do
     firstPipeFilter <- compile p1 inp
     pipeHelper firstPipeFilter
@@ -73,6 +80,18 @@ sliceArray i j xs
     -- Used a LLM to generate test cases to debug to find this fix for putting the indices always in bounds (the LLM did not write the code it just provided me test inputs that should pass in jq)
     putStartInBounds = max 0 (min n start)
     putEndInBounds = max 0 (min n end)
+
+arrayIteratorHelper :: [Int] -> [JSON] -> [JSON]
+arrayIteratorHelper [] _ = []
+arrayIteratorHelper (i:is) xs = arrayIndexHelper i xs : arrayIteratorHelper is xs
+
+arrayIndexHelper :: Int -> [JSON] -> JSON
+arrayIndexHelper i xs
+    | index >= 0 && index < n = xs !! index
+    | otherwise = JNull
+  where
+    n = length xs
+    index = if i < 0 then n + i else i
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
 run p = p -- VS code recommended that this can be eta reduced by removing the j parameter

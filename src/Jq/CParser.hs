@@ -67,7 +67,7 @@ parseOptionalStringIndexing = do
 
 parseArrayIndexing :: Parser Filter
 parseArrayIndexing = do
-  _ <- token (char '.')
+  _ <- token . char $ '.'
   _ <- token (char '[')
   index <- integer
   _ <- token (char ']')
@@ -75,7 +75,7 @@ parseArrayIndexing = do
 
 parseArraySlicing :: Parser Filter
 parseArraySlicing = do
-  _ <- token (char '.')
+  _ <- token . char $ '.'
   _ <- token (char '[')
   i <- optional integer
   _ <- token (char ':')
@@ -83,8 +83,26 @@ parseArraySlicing = do
   _ <- token (char ']')
   return (ArraySlicing i j)
 
+parseFullIterator :: Parser Filter
+parseFullIterator = do
+  _ <- token . char $ '.'
+  _ <- token (char '[')
+  _ <- token (char ']')
+  return FullIterator
+
+parseValueIterator :: Parser Filter
+parseValueIterator = do
+  _ <- token . char $ '.'
+  _ <- token (char '[')
+  i <- integer
+  is <- many (do
+    _ <- token (char ',')
+    integer)
+  _ <- token (char ']')
+  return (ValueIterator (i:is))
+
 parseFirstChainedFilter :: Parser Filter
-parseFirstChainedFilter = parseParenthesis <|> parseArraySlicing <|> parseArrayIndexing <|> parseOptionalGenericIndexing 
+parseFirstChainedFilter = parseParenthesis <|> parseArraySlicing <|> parseFullIterator <|> parseArrayIndexing <|> parseValueIterator <|> parseOptionalGenericIndexing 
   <|> parseGenericIndexing <|> parseOptionalStringIndexing <|> parseStringIndexing <|> parseOptionalIdentifierIndexing
   <|> parseIdentifierIndexing
 
@@ -103,7 +121,7 @@ and used foldl inside of parseChainedIndexing
 parseChainedIndexing :: Parser Filter
 parseChainedIndexing = do
   firstIndex <- parseFirstChainedFilter
-  chainedIndexes <- many (parseArraySlicing <|> parseArrayIndexing <|> parseGenericIndexing <|> parseStringIndexing <|> parseIdentifierIndexing)
+  chainedIndexes <- many (parseArraySlicing <|> parseFullIterator <|> parseArrayIndexing <|> parseValueIterator <|> parseGenericIndexing <|> parseStringIndexing <|> parseIdentifierIndexing)
   return (foldl Pipe firstIndex chainedIndexes)
 
 {-
