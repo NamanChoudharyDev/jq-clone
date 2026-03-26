@@ -71,6 +71,34 @@ compile (Comma c1 c2) inp = do
     secondCommaFilter <- compile c2 inp
     return (firstCommaFilter ++ secondCommaFilter)
 
+compile (OptionalArrayIndexing _) JNull = return [JNull]
+compile (OptionalArrayIndexing i) (JArray xs)
+    | index >= 0 && index < n = return [xs !! index]
+    | otherwise = return [JNull]
+    where
+        n = length xs
+        index = if i < 0 then n + i else i
+compile (OptionalArrayIndexing _) _ = return []
+
+compile (OptionalArraySlicing _ _) JNull = return [JNull]
+compile (OptionalArraySlicing i j) (JArray xs) = return [JArray (sliceArray i j xs)]
+compile (OptionalArraySlicing _ _) _ = return []
+
+compile OptionalFullIterator JNull = return []
+compile OptionalFullIterator (JArray xs) = return xs
+compile OptionalFullIterator (JObject inp) = return (map snd inp)
+compile OptionalFullIterator _ = return []
+
+compile (OptionalValueIterator iter) JNull = return (map (const JNull) iter)
+compile (OptionalValueIterator iter) (JArray xs) = return (arrayIteratorHelper iter xs)
+compile (OptionalValueIterator _) _ = return []
+
+compile (OptionalStringValueIterator _) JNull = return [JNull]
+compile (OptionalStringValueIterator keys) (JObject inp) = return (map (\key -> case lookup key inp of
+    Just value  -> value
+    Nothing -> JNull) keys)
+compile (OptionalStringValueIterator _) _ = return []
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 sliceArray :: Maybe Int -> Maybe Int -> [JSON] -> [JSON]
 sliceArray i j xs
