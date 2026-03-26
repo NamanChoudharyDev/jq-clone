@@ -9,7 +9,7 @@ type JProgram a = JSON -> Either String a
 compile :: Filter -> JProgram [JSON]
 compile Identity inp = return [inp]
 
-compile (Parenthesis f) inp = compile f inp
+compile (Parenthesis p) inp = compile p inp
 
 compile (StringIndexing _) JNull = return [JNull]
 compile (StringIndexing key) (JObject inp) =
