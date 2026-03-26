@@ -201,15 +201,15 @@ to this:
 -}
 parsePipe :: Parser Filter
 parsePipe = do
-  left <- parseParenthesis <|> parseChainedIndexing <|> parseIdentity
+  left <- parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
   _ <- token (char '|')
   Pipe left <$> parseFilter
 
 parseComma :: Parser Filter
 parseComma = do
-  left <- parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
+  left <- parseParenthesis <|> parseChainedIndexing <|> parseIdentity
   _ <- token (char ',')
-  Comma left <$> parseFilter
+  Comma left <$> (parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity)
 
 parseFilter :: Parser Filter
 parseFilter = parsePipe <|> parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
