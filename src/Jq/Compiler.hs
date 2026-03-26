@@ -49,6 +49,13 @@ compile (ValueIterator iter) JNull = return (map (const JNull) iter)
 compile (ValueIterator iter) (JArray xs) = return (arrayIteratorHelper iter xs)
 compile (ValueIterator _) _ = Left "The argument was a JSON type that is not iterable with the value iterator"
 
+compile (StringValueIterator _) JNull = return [JNull]
+compile (StringValueIterator keys) (JObject inp) = return (map (\key -> case lookup key inp of
+    Just value -> value
+    Nothing -> JNull) 
+    keys)
+compile (StringValueIterator _) _ = Left "The argument was a JSON type that is not indexable with string keys"
+
 compile (Pipe p1 p2) inp = do
     firstPipeFilter <- compile p1 inp
     pipeHelper firstPipeFilter

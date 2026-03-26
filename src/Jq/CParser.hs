@@ -101,10 +101,21 @@ parseValueIterator = do
   _ <- token (char ']')
   return (ValueIterator (i:is))
 
+parseStringValueIterator :: Parser Filter
+parseStringValueIterator = do
+  _ <- token . char $ '.'
+  _ <- token (char '[')
+  key <- token escapedString
+  keys <- many (do
+    _ <- token (char ',')
+    token escapedString)
+  _ <- token (char ']')
+  return (StringValueIterator (key:keys))
+
 parseFirstChainedFilter :: Parser Filter
-parseFirstChainedFilter = parseParenthesis <|> parseArraySlicing <|> parseFullIterator <|> parseArrayIndexing <|> parseValueIterator <|> parseOptionalGenericIndexing 
-  <|> parseGenericIndexing <|> parseOptionalStringIndexing <|> parseStringIndexing <|> parseOptionalIdentifierIndexing
-  <|> parseIdentifierIndexing
+parseFirstChainedFilter = parseParenthesis <|> parseArraySlicing <|> parseFullIterator <|> parseArrayIndexing 
+  <|> parseValueIterator <|> parseOptionalGenericIndexing <|> parseStringValueIterator <|> parseGenericIndexing 
+  <|> parseOptionalStringIndexing <|> parseStringIndexing <|> parseOptionalIdentifierIndexing <|> parseIdentifierIndexing
 
 {-
 I first had a function filterChaining defined as so:
@@ -121,7 +132,8 @@ and used foldl inside of parseChainedIndexing
 parseChainedIndexing :: Parser Filter
 parseChainedIndexing = do
   firstIndex <- parseFirstChainedFilter
-  chainedIndexes <- many (parseArraySlicing <|> parseFullIterator <|> parseArrayIndexing <|> parseValueIterator <|> parseGenericIndexing <|> parseStringIndexing <|> parseIdentifierIndexing)
+  chainedIndexes <- many (parseArraySlicing <|> parseFullIterator <|> parseArrayIndexing <|> parseValueIterator 
+    <|> parseStringValueIterator <|> parseGenericIndexing <|> parseStringIndexing <|> parseIdentifierIndexing)
   return (foldl Pipe firstIndex chainedIndexes)
 
 {-
