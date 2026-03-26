@@ -83,6 +83,11 @@ parseArraySlicing = do
   _ <- token (char ']')
   return (ArraySlicing i j)
 
+parseFirstChainedFilter :: Parser Filter
+parseFirstChainedFilter = parseParenthesis <|> parseArraySlicing <|> parseArrayIndexing <|> parseOptionalGenericIndexing 
+  <|> parseGenericIndexing <|> parseOptionalStringIndexing <|> parseStringIndexing <|> parseOptionalIdentifierIndexing
+  <|> parseIdentifierIndexing
+
 {-
 I first had a function filterChaining defined as so:
 chainFilters :: Filter -> [Filter] -> Filter
@@ -97,7 +102,7 @@ and used foldl inside of parseChainedIndexing
 -}
 parseChainedIndexing :: Parser Filter
 parseChainedIndexing = do
-  firstIndex <- parseArraySlicing <|> parseArrayIndexing <|> parseOptionalGenericIndexing <|> parseGenericIndexing <|> parseOptionalStringIndexing <|> parseStringIndexing <|> parseOptionalIdentifierIndexing <|> parseIdentifierIndexing
+  firstIndex <- parseFirstChainedFilter
   chainedIndexes <- many (parseArraySlicing <|> parseArrayIndexing <|> parseGenericIndexing <|> parseStringIndexing <|> parseIdentifierIndexing)
   return (foldl Pipe firstIndex chainedIndexes)
 
