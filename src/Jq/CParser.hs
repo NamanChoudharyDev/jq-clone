@@ -14,7 +14,8 @@ parseParenthesis = do
   _ <- token (char '(')
   p <- parseFilter
   _ <- token (char ')')
-  return p
+  return (Parenthesis p)
+
 {-
   For this parser my VS code said my code:
     key <- ident
@@ -206,9 +207,11 @@ parsePipe = do
 
 parseComma :: Parser Filter
 parseComma = do
-  left <- parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
-  _ <- token (char ',')
-  Comma left <$> parseFilter
+  firstFilter <- parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
+  otherFilters <- many (do
+    _ <- token (char ',')
+    parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity)
+  return (foldl Comma firstFilter otherFilters)
 
 parseFilter :: Parser Filter
 parseFilter = parseComma <|> parsePipe <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
