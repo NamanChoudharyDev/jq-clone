@@ -14,8 +14,7 @@ parseParenthesis = do
   _ <- token (char '(')
   p <- parseFilter
   _ <- token (char ')')
-  return (Parenthesis p)
-
+  return p
 {-
   For this parser my VS code said my code:
     key <- ident
