@@ -3,6 +3,7 @@ module Jq.CParser where
 import Parsing.Parsing
 import Jq.Filters
 import Parsing.Utils
+import Jq.Json
 
 parseIdentity :: Parser Filter
 parseIdentity = do
@@ -164,6 +165,18 @@ parseOptionalStringValueIterator = do
   _ <- token (char '?')
   return (OptionalStringValueIterator (key:keys))
 
+parseSimpleLiteralNull :: Parser Filter
+parseSimpleLiteralNull = SimpleLiteralConstructor JNull <$ symbol "null"
+
+parseSimpleLiteralBool :: Parser Filter
+parseSimpleLiteralBool = (SimpleLiteralConstructor (JBool True) <$ symbol "true") <|> (SimpleLiteralConstructor (JBool False) <$ symbol "false")
+
+parseSimpleLiteralNumber :: Parser Filter
+parseSimpleLiteralNumber = SimpleLiteralConstructor . JNumber . read <$> token rawNumber
+
+parseSimpleLiteralString :: Parser Filter
+parseSimpleLiteralString = SimpleLiteralConstructor . JString <$> token escapedString
+
 parseFirstChainedFilter :: Parser Filter
 parseFirstChainedFilter = parseParenthesis <|> parseOptionalArraySlicing <|> parseArraySlicing <|> parseOptionalFullIterator 
   <|> parseFullIterator <|> parseOptionalArrayIndexing <|> parseArrayIndexing <|> parseOptionalValueIterator 
@@ -201,18 +214,22 @@ to this:
 -}
 parsePipe :: Parser Filter
 parsePipe = do
-  left <- parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
+  left <- parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+    <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseIdentity
   _ <- token (char '|')
   Pipe left <$> parseFilter
 
 parseComma :: Parser Filter
 parseComma = do
-  left <- parseParenthesis <|> parseChainedIndexing <|> parseIdentity
+  left <- parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+    <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseIdentity
   _ <- token (char ',')
-  Comma left <$> (parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity)
+  Comma left <$> (parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+    <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseIdentity)
 
 parseFilter :: Parser Filter
-parseFilter = parsePipe <|> parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseIdentity
+parseFilter = parsePipe <|> parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+    <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of

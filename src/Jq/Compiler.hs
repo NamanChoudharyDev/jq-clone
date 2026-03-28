@@ -99,6 +99,7 @@ compile (OptionalStringValueIterator keys) (JObject inp) = return (map (\key -> 
     Nothing -> JNull) keys)
 compile (OptionalStringValueIterator _) _ = return []
 
+compile (SimpleLiteralConstructor json) _ = return [json]
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 sliceArray :: Maybe Int -> Maybe Int -> [JSON] -> [JSON]
 sliceArray i j xs
