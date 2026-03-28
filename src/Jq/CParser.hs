@@ -194,6 +194,47 @@ parseSimpleNonEmptyArrayConstructor = do
   _ <- token (char ']')
   return (SimpleArrayConstructor (f:fs))
 
+parseSimpleObjectConstructor :: Parser Filter
+parseSimpleObjectConstructor = parseSimpleEmptyObjectConstructor <|> parseSimpleNonEmptyObjectConstructor
+
+parseSimpleEmptyObjectConstructor :: Parser Filter
+parseSimpleEmptyObjectConstructor = do
+  _ <- token (char '{')
+  _ <- token (char '}')
+  return (SimpleObjectConstructor [])
+
+parseSimpleNonEmptyObjectConstructor :: Parser Filter
+parseSimpleNonEmptyObjectConstructor = do
+  _ <- token (char '{')
+  obj <- parseSimpleObjectHelper
+  objs <- many (token (char ',') *> parseSimpleObjectHelper)
+  _ <- token (char '}')
+  return (SimpleObjectConstructor (obj:objs))
+
+parseSimpleObjectHelper :: Parser (Filter, Filter)
+parseSimpleObjectHelper = parseSimpleObjectKeyValueFilter <|> parseSimpleObjectIdentifier <|> parseSimpleObjectString
+
+parseSimpleObjectKeyValueFilter :: Parser (Filter, Filter)
+parseSimpleObjectKeyValueFilter = do
+  _ <- token (char '(')
+  keyFilter <- parseFilter
+  _ <- token (char ')')
+  _ <- token (char ':')
+  valueFilter <- parseFilter
+  return (keyFilter, valueFilter)
+
+parseSimpleObjectIdentifier :: Parser (Filter, Filter)
+parseSimpleObjectIdentifier = do
+  key <- token ident
+  value <- (token (char ':') *> parseFilter) <|> return (StringIndexing key)
+  return (SimpleLiteralConstructor (JString key), value)
+
+parseSimpleObjectString:: Parser (Filter, Filter)
+parseSimpleObjectString = do
+  key <- token escapedString
+  val <- (token (char ':') *> parseFilter) <|> return (StringIndexing key)
+  return (SimpleLiteralConstructor (JString key), val)
+
 parseFirstChainedFilter :: Parser Filter
 parseFirstChainedFilter = parseParenthesis <|> parseOptionalArraySlicing <|> parseArraySlicing <|> parseOptionalFullIterator 
   <|> parseFullIterator <|> parseOptionalArrayIndexing <|> parseArrayIndexing <|> parseOptionalValueIterator 
@@ -232,21 +273,21 @@ to this:
 parsePipe :: Parser Filter
 parsePipe = do
   left <- parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
-    <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseIdentity
+    <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseSimpleObjectConstructor <|> parseIdentity
   _ <- token (char '|')
   Pipe left <$> parseFilter
 
 parseComma :: Parser Filter
 parseComma = do
   left <- parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
-    <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseIdentity
+    <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseSimpleObjectConstructor <|>  parseIdentity
   _ <- token (char ',')
   Comma left <$> (parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
     <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseIdentity)
 
 parseFilter :: Parser Filter
 parseFilter = parsePipe <|> parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
-    <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseIdentity
+    <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseSimpleObjectConstructor <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
