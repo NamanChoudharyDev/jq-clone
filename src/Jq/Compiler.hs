@@ -100,6 +100,17 @@ compile (OptionalStringValueIterator keys) (JObject inp) = return (map (\key -> 
 compile (OptionalStringValueIterator _) _ = return []
 
 compile (SimpleLiteralConstructor json) _ = return [json]
+
+compile (SimpleArrayConstructor fs) inp = do
+    xs <- simpleArrayConstructorHelper fs inp
+    return [JArray xs]
+
+simpleArrayConstructorHelper :: [Filter] -> JSON -> Either String [JSON]
+simpleArrayConstructorHelper [] _ = return []
+simpleArrayConstructorHelper (f:fs) inp = do
+    xs <- compile f inp
+    ys <- simpleArrayConstructorHelper fs inp
+    return (xs ++ ys)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 sliceArray :: Maybe Int -> Maybe Int -> [JSON] -> [JSON]
 sliceArray i j xs

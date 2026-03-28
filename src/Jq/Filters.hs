@@ -18,6 +18,7 @@ data Filter = Identity
   | Pipe Filter Filter
   | Comma Filter Filter
   | SimpleLiteralConstructor JSON
+  | SimpleArrayConstructor [Filter]
 
 instance Show Filter where
   show Identity = "."
@@ -61,6 +62,11 @@ instance Show Filter where
   show (Pipe p1 p2) = show p1 ++ " | " ++ show p2
   show (Comma c1 c2) = show c1 ++ " , " ++ show c2
   show (SimpleLiteralConstructor json) = show json
+  show (SimpleArrayConstructor arrayFilters) = "[" ++ showArray arrayFilters ++ "]"
+    where
+      showArray [] = ""
+      showArray [f] = show f
+      showArray (f:fs) = show f ++ ", " ++ showArray fs
 
 instance Eq Filter where
   Identity == Identity = True
@@ -80,6 +86,7 @@ instance Eq Filter where
   (Pipe pa pb) == (Pipe pc pd) = pa == pc && pb == pd
   (Comma ca cb) == (Comma cc cd) = ca == cc && cb == cd
   (SimpleLiteralConstructor a) == (SimpleLiteralConstructor b) = a == b
+  (SimpleArrayConstructor a) == (SimpleArrayConstructor b) = a == b
   _ == _ = False
 
 newtype Config = ConfigC {filters :: Filter} -- hlint recommmended me to define this with the keyword newtype instead of data. I like not having blue lines in my VS code so I applied it and in the recommendation it said decreases laziness
