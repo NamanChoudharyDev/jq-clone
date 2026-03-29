@@ -107,9 +107,8 @@ compile (SimpleArrayConstructor fs) inp = do
     xs <- simpleArrayConstructorHelper fs inp
     return [JArray xs]
 
-compile (SimpleObjectConstructor obj) inp = do
-    xs <- simpleObjectConstructorHelper obj inp
-    return [JObject xs]
+compile (SimpleObjectConstructor obj) inp =
+    simpleObjectConstructorHelper obj inp
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 sliceArray :: Maybe Int -> Maybe Int -> [JSON] -> [JSON]
 sliceArray i j xs
@@ -166,15 +165,13 @@ simpleArrayConstructorHelper (f:fs) inp = do
     ys <- simpleArrayConstructorHelper fs inp
     return (xs ++ ys)
 
-simpleObjectConstructorHelper :: [(Filter, Filter)] -> JSON -> Either String [(String, JSON)]
-simpleObjectConstructorHelper [] _ = return []
+simpleObjectConstructorHelper :: [(Filter, Filter)] -> JSON -> Either String [JSON]
+simpleObjectConstructorHelper [] _ = return [JObject []]
 simpleObjectConstructorHelper ((keyFilter, valueFilter):fs) inp = do
     keyCompile <- compile keyFilter inp
     valueCompile <- compile valueFilter inp
     restOfTheFilters <- simpleObjectConstructorHelper fs inp
-    case (keyCompile, valueCompile) of
-        ([JString key], [value]) -> return ((key, value) : restOfTheFilters)
-        _ -> Left "Simple object constructor entries must compile to a string key and a JSON value"
+    return [JObject ((key, value) : keyValues) | JString key <- keyCompile, value <- valueCompile, JObject keyValues <- restOfTheFilters]
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
 run p = p -- VS code recommended that this can be eta reduced by removing the j parameter
