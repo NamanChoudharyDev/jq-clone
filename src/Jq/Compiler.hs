@@ -37,6 +37,7 @@ compile (ArrayIndexing _) _ =
 
 compile (ArraySlicing _ _) JNull = return [JNull]
 compile (ArraySlicing i j) (JArray xs) = return [JArray (sliceArray i j xs)]
+compile (ArraySlicing i j) (JString s) = return [JString (sliceString i j s)]
 compile (ArraySlicing _ _) _ =
     Left "The argument was a JSON type that is not sliceable"
 
@@ -82,6 +83,7 @@ compile (OptionalArrayIndexing _) _ = return []
 
 compile (OptionalArraySlicing _ _) JNull = return [JNull]
 compile (OptionalArraySlicing i j) (JArray xs) = return [JArray (sliceArray i j xs)]
+compile (OptionalArraySlicing i j) (JString s) = return [JString (sliceString i j s)]
 compile (OptionalArraySlicing _ _) _ = return []
 
 compile OptionalFullIterator JNull = return []
@@ -124,6 +126,24 @@ sliceArray i j xs
         Nothing -> n
         Just k -> if k < 0 then n + k else k
     -- Used a LLM to generate test cases to debug to find this fix for putting the indices always in bounds (the LLM did not write the code it just provided me test inputs that should pass in jq)
+    putStartInBounds = max 0 (min n start)
+    putEndInBounds = max 0 (min n end)
+
+sliceString :: Maybe Int -> Maybe Int -> String -> String
+sliceString i j xs
+    | putStartInBounds >= putEndInBounds = []
+    | otherwise = take (putEndInBounds - putStartInBounds) (drop putStartInBounds xs)
+  where
+    n = length xs
+
+    start = case i of
+        Nothing -> 0
+        Just k -> if k < 0 then n + k else k
+
+    end = case j of
+        Nothing -> n
+        Just k -> if k < 0 then n + k else k
+
     putStartInBounds = max 0 (min n start)
     putEndInBounds = max 0 (min n end)
 
