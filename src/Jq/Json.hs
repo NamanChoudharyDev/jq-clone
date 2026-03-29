@@ -2,6 +2,7 @@ module Jq.Json where
 
 import Text.Printf (printf)
 import Data.Char (isControl, ord)
+import Data.List (sortOn)
 
 data JSON =
      JNull
@@ -25,7 +26,7 @@ showHelper _ (JBool False) = "false"
 showHelper _ (JArray []) = "[]"
 showHelper num (JArray array) = "[" ++ "\n" ++ formatInput (num + 2) (map (showHelper (num + 2)) array) ++ "\n" ++ indent num ++ "]"
 showHelper _ (JObject []) = "{}"
-showHelper num (JObject object) = "{" ++ "\n" ++ formatInput (num + 2) (map showKeyValuePair object) ++ "\n" ++ indent num ++ "}"
+showHelper num (JObject object) = "{" ++ "\n" ++ formatInput (num + 2) (map showKeyValuePair (sortOn fst object)) ++ "\n" ++ indent num ++ "}"
   where
     showKeyValuePair (key, value) = showHelper (num + 2) (JString key) ++ ": " ++ showHelper (num + 2) value
 

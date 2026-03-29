@@ -37,6 +37,7 @@ compile (ArrayIndexing _) _ =
 
 compile (ArraySlicing _ _) JNull = return [JNull]
 compile (ArraySlicing i j) (JArray xs) = return [JArray (sliceArray i j xs)]
+compile (ArraySlicing i j) (JString s) = return [JString (sliceString i j s)]
 compile (ArraySlicing _ _) _ =
     Left "The argument was a JSON type that is not sliceable"
 
@@ -82,6 +83,7 @@ compile (OptionalArrayIndexing _) _ = return []
 
 compile (OptionalArraySlicing _ _) JNull = return [JNull]
 compile (OptionalArraySlicing i j) (JArray xs) = return [JArray (sliceArray i j xs)]
+compile (OptionalArraySlicing i j) (JString s) = return [JString (sliceString i j s)]
 compile (OptionalArraySlicing _ _) _ = return []
 
 compile OptionalFullIterator JNull = return []
@@ -99,6 +101,14 @@ compile (OptionalStringValueIterator keys) (JObject inp) = return (map (\key -> 
     Nothing -> JNull) keys)
 compile (OptionalStringValueIterator _) _ = return []
 
+compile (SimpleLiteralConstructor json) _ = return [json]
+
+compile (SimpleArrayConstructor fs) inp = do
+    xs <- simpleArrayConstructorHelper fs inp
+    return [JArray xs]
+
+compile (SimpleObjectConstructor obj) inp =
+    simpleObjectConstructorHelper obj inp
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 sliceArray :: Maybe Int -> Maybe Int -> [JSON] -> [JSON]
 sliceArray i j xs
@@ -118,6 +128,24 @@ sliceArray i j xs
     putStartInBounds = max 0 (min n start)
     putEndInBounds = max 0 (min n end)
 
+sliceString :: Maybe Int -> Maybe Int -> String -> String
+sliceString i j xs
+    | putStartInBounds >= putEndInBounds = []
+    | otherwise = take (putEndInBounds - putStartInBounds) (drop putStartInBounds xs)
+  where
+    n = length xs
+
+    start = case i of
+        Nothing -> 0
+        Just k -> if k < 0 then n + k else k
+
+    end = case j of
+        Nothing -> n
+        Just k -> if k < 0 then n + k else k
+
+    putStartInBounds = max 0 (min n start)
+    putEndInBounds = max 0 (min n end)
+
 arrayIteratorHelper :: [Int] -> [JSON] -> [JSON]
 arrayIteratorHelper [] _ = []
 arrayIteratorHelper (i:is) xs = arrayIndexHelper i xs : arrayIteratorHelper is xs
@@ -129,6 +157,21 @@ arrayIndexHelper i xs
   where
     n = length xs
     index = if i < 0 then n + i else i
+
+simpleArrayConstructorHelper :: [Filter] -> JSON -> Either String [JSON]
+simpleArrayConstructorHelper [] _ = return []
+simpleArrayConstructorHelper (f:fs) inp = do
+    xs <- compile f inp
+    ys <- simpleArrayConstructorHelper fs inp
+    return (xs ++ ys)
+
+simpleObjectConstructorHelper :: [(Filter, Filter)] -> JSON -> Either String [JSON]
+simpleObjectConstructorHelper [] _ = return [JObject []]
+simpleObjectConstructorHelper ((keyFilter, valueFilter):fs) inp = do
+    keyCompile <- compile keyFilter inp
+    valueCompile <- compile valueFilter inp
+    restOfTheFilters <- simpleObjectConstructorHelper fs inp
+    return [JObject ((key, value) : keyValues) | JString key <- keyCompile, value <- valueCompile, JObject keyValues <- restOfTheFilters]
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
 run p = p -- VS code recommended that this can be eta reduced by removing the j parameter
