@@ -20,6 +20,7 @@ data Filter = Identity
   | SimpleLiteralConstructor JSON
   | SimpleArrayConstructor [Filter]
   | SimpleObjectConstructor [(Filter, Filter)]
+  | RecursiveDescent
 
 instance Show Filter where
   show Identity = "."
@@ -75,6 +76,7 @@ instance Show Filter where
       showSimpleObject [] = ""
       showSimpleObject [(key,value)] = show key ++ ": " ++ show value
       showSimpleObject ((key,value):kvs) = show key ++ ": " ++ show value ++ ", " ++ showSimpleObject kvs
+  show RecursiveDescent = ".."
 
 instance Eq Filter where
   Identity == Identity = True
@@ -96,6 +98,7 @@ instance Eq Filter where
   (SimpleLiteralConstructor a) == (SimpleLiteralConstructor b) = a == b
   (SimpleArrayConstructor a) == (SimpleArrayConstructor b) = a == b
   (SimpleObjectConstructor a) == (SimpleObjectConstructor b) = a == b
+  RecursiveDescent == RecursiveDescent = True
   _ == _ = False
 
 newtype Config = ConfigC {filters :: Filter} -- hlint recommmended me to define this with the keyword newtype instead of data. I like not having blue lines in my VS code so I applied it and in the recommendation it said decreases laziness

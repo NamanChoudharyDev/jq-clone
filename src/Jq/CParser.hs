@@ -235,6 +235,11 @@ parseSimpleObjectString = do
   val <- (token (char ':') *> parseFilter) <|> return (StringIndexing key)
   return (SimpleLiteralConstructor (JString key), val)
 
+parseRecursiveDescent :: Parser Filter
+parseRecursiveDescent = do
+  _ <- token (string "..")
+  return RecursiveDescent
+
 parseFirstChainedFilter :: Parser Filter
 parseFirstChainedFilter = parseParenthesis <|> parseOptionalArraySlicing <|> parseArraySlicing <|> parseOptionalFullIterator 
   <|> parseFullIterator <|> parseOptionalArrayIndexing <|> parseArrayIndexing <|> parseOptionalValueIterator 
@@ -272,21 +277,21 @@ to this:
 -}
 parsePipe :: Parser Filter
 parsePipe = do
-  left <- parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+  left <- parseComma <|> parseParenthesis  <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
     <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseSimpleObjectConstructor <|> parseIdentity
   _ <- token (char '|')
   Pipe left <$> parseFilter
 
 parseComma :: Parser Filter
 parseComma = do
-  left <- parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+  left <- parseParenthesis <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
     <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseSimpleObjectConstructor <|>  parseIdentity
   _ <- token (char ',')
-  Comma left <$> (parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+  Comma left <$> (parseComma <|> parseParenthesis <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
     <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseIdentity)
 
 parseFilter :: Parser Filter
-parseFilter = parsePipe <|> parseComma <|> parseParenthesis <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+parseFilter = parsePipe <|> parseComma <|> parseParenthesis <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
     <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseSimpleObjectConstructor <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config

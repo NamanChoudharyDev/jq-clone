@@ -109,6 +109,8 @@ compile (SimpleArrayConstructor fs) inp = do
 
 compile (SimpleObjectConstructor obj) inp =
     simpleObjectConstructorHelper obj inp
+
+compile RecursiveDescent inp = return (recursiveDescentHelper inp)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 sliceArray :: Maybe Int -> Maybe Int -> [JSON] -> [JSON]
 sliceArray i j xs
@@ -172,6 +174,12 @@ simpleObjectConstructorHelper ((keyFilter, valueFilter):fs) inp = do
     valueCompile <- compile valueFilter inp
     restOfTheFilters <- simpleObjectConstructorHelper fs inp
     return [JObject ((key, value) : keyValues) | JString key <- keyCompile, value <- valueCompile, JObject keyValues <- restOfTheFilters]
+
+recursiveDescentHelper :: JSON -> [JSON]
+recursiveDescentHelper inp = inp : case inp of
+    JArray xs -> [descentValue | value <- xs, descentValue <- recursiveDescentHelper value]
+    JObject obj -> [descentValue | (_, value) <- obj, descentValue <- recursiveDescentHelper value]
+    _ -> []
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
 run p = p -- VS code recommended that this can be eta reduced by removing the j parameter
