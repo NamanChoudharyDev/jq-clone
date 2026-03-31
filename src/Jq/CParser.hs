@@ -240,11 +240,26 @@ parseRecursiveDescent = do
   _ <- token (string "..")
   return RecursiveDescent
 
+{-
+I had this code first I written self:
+  catchFilter <- parseFilter
+  return (TryCatch tryFilter catchFilter)
+but hlint stepped in and said why not write it like this:
+TryCatch tryFilter <$> parseFilter
+I accepted this, because I do not like blue lines under my code
+-}
+parseTryCatch :: Parser Filter
+parseTryCatch = do
+    _ <- symbol "try"
+    tryFilter <- parseFilter
+    _ <- symbol "catch"
+    TryCatch tryFilter <$> parseFilter
+
 parseFirstChainedFilter :: Parser Filter
-parseFirstChainedFilter = parseParenthesis <|> parseOptionalArraySlicing <|> parseArraySlicing <|> parseOptionalFullIterator 
-  <|> parseFullIterator <|> parseOptionalArrayIndexing <|> parseArrayIndexing <|> parseOptionalValueIterator 
+parseFirstChainedFilter = parseParenthesis <|> parseOptionalArraySlicing <|> parseArraySlicing <|> parseOptionalFullIterator
+  <|> parseFullIterator <|> parseOptionalArrayIndexing <|> parseArrayIndexing <|> parseOptionalValueIterator
   <|> parseValueIterator <|> parseOptionalGenericIndexing <|> parseOptionalStringValueIterator <|> parseStringValueIterator
-  <|> parseGenericIndexing <|> parseOptionalStringIndexing <|> parseStringIndexing <|> parseOptionalIdentifierIndexing 
+  <|> parseGenericIndexing <|> parseOptionalStringIndexing <|> parseStringIndexing <|> parseOptionalIdentifierIndexing
   <|> parseIdentifierIndexing
 
 {-
@@ -277,21 +292,21 @@ to this:
 -}
 parsePipe :: Parser Filter
 parsePipe = do
-  left <- parseComma <|> parseParenthesis  <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+  left <- parseComma <|> parseParenthesis  <|> parseTryCatch <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool
     <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseSimpleObjectConstructor <|> parseIdentity
   _ <- token (char '|')
   Pipe left <$> parseFilter
 
 parseComma :: Parser Filter
 parseComma = do
-  left <- parseParenthesis <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+  left <- parseParenthesis <|> parseTryCatch <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool
     <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseSimpleObjectConstructor <|>  parseIdentity
   _ <- token (char ',')
-  Comma left <$> (parseComma <|> parseParenthesis <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+  Comma left <$> (parseComma <|> parseParenthesis <|> parseTryCatch <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool
     <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseIdentity)
 
 parseFilter :: Parser Filter
-parseFilter = parsePipe <|> parseComma <|> parseParenthesis <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool 
+parseFilter = parsePipe <|> parseComma <|> parseParenthesis <|> parseTryCatch <|> parseRecursiveDescent <|> parseChainedIndexing <|> parseSimpleLiteralNull <|> parseSimpleLiteralBool
     <|> parseSimpleLiteralNumber <|> parseSimpleLiteralString <|> parseSimpleArray <|> parseSimpleObjectConstructor <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config

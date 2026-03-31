@@ -111,6 +111,11 @@ compile (SimpleObjectConstructor obj) inp =
     simpleObjectConstructorHelper obj inp
 
 compile RecursiveDescent inp = return (recursiveDescentHelper inp)
+
+compile (TryCatch tryFilter catchFilter) inp =
+    case compile tryFilter inp of
+        Right value -> return value
+        Left catchError -> compile catchFilter (JString catchError)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 sliceArray :: Maybe Int -> Maybe Int -> [JSON] -> [JSON]
 sliceArray i j xs
